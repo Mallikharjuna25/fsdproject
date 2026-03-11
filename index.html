@@ -1,0 +1,2227 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <meta name="description"
+        content="NoteNest — Share notes, model papers, question papers and study materials. Browse and download for free." />
+    <title>NoteNest — Share Knowledge. Download Success.</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;900&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap"
+        rel="stylesheet" />
+    <style>
+        :root {
+            --clr-bg: #0d0d0d;
+            --clr-surface: #1a1a1a;
+            --clr-surface2: #1e1e1e;
+            --clr-border: #2a2a2a;
+            --clr-green: #1a6b4a;
+            --clr-green-light: #22a06b;
+            --clr-green-glow: rgba(26, 107, 74, .35);
+            --clr-amber: #f5a623;
+            --clr-amber-dark: #c4821a;
+            --clr-coral: #ff6b6b;
+            --clr-teal: #00b4a6;
+            --clr-white: #ffffff;
+            --clr-gray: #a0a0a0;
+            --clr-gray2: #6a6a6a;
+            --ff-display: 'Playfair Display', serif;
+            --ff-body: 'DM Sans', sans-serif;
+            --ff-mono: 'JetBrains Mono', monospace;
+            --radius: 12px;
+            --radius-lg: 20px;
+            --shadow-glow: 0 0 24px var(--clr-green-glow);
+            --transition: .3s ease;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        html {
+            scroll-behavior: smooth
+        }
+
+        body {
+            background: var(--clr-bg);
+            color: var(--clr-white);
+            font-family: var(--ff-body);
+            overflow-x: hidden;
+            line-height: 1.6
+        }
+
+        /* ── SCROLLBAR ── */
+        ::-webkit-scrollbar {
+            width: 6px
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #111
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--clr-green);
+            border-radius: 3px
+        }
+
+        /* ── LOADER ── */
+        #loader {
+            position: fixed;
+            inset: 0;
+            background: var(--clr-bg);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 16px;
+            transition: opacity .6s, visibility .6s
+        }
+
+        #loader.hidden {
+            opacity: 0;
+            visibility: hidden
+        }
+
+        .loader-ring {
+            width: 56px;
+            height: 56px;
+            border: 3px solid var(--clr-border);
+            border-top-color: var(--clr-amber);
+            border-radius: 50%;
+            animation: spin 1s linear infinite
+        }
+
+        .loader-logo {
+            font-family: var(--ff-display);
+            font-size: 1.4rem;
+            color: var(--clr-green-light);
+            letter-spacing: 1px
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+
+        /* ── BACK TO TOP ── */
+        #backTop {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            width: 44px;
+            height: 44px;
+            background: var(--clr-green);
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+            z-index: 500;
+            box-shadow: var(--shadow-glow)
+        }
+
+        #backTop.show {
+            opacity: 1;
+            visibility: visible
+        }
+
+        #backTop:hover {
+            background: var(--clr-green-light);
+            transform: translateY(-3px)
+        }
+
+        #backTop svg {
+            fill: white;
+            width: 18px;
+            height: 18px
+        }
+
+        /* ── UTILITY ── */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px
+        }
+
+        .section-tag {
+            font-family: var(--ff-mono);
+            font-size: .75rem;
+            color: var(--clr-amber);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            display: block
+        }
+
+        .section-title {
+            font-family: var(--ff-display);
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 16px
+        }
+
+        .section-sub {
+            color: var(--clr-gray);
+            font-size: clamp(.95rem, 1.5vw, 1.1rem);
+            max-width: 560px
+        }
+
+        .fade-in {
+            opacity: 0;
+            transform: translateY(32px);
+            transition: opacity .7s ease, transform .7s ease
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: none
+        }
+
+        /* ── NAVBAR ── */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 20px 0;
+            transition: var(--transition)
+        }
+
+        nav.scrolled {
+            background: rgba(13, 13, 13, .85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--clr-border);
+            padding: 14px 0
+        }
+
+        .nav-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none
+        }
+
+        .nav-logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--clr-green), var(--clr-green-light));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center
+        }
+
+        .nav-logo-icon svg {
+            fill: white;
+            width: 20px;
+            height: 20px
+        }
+
+        .nav-logo-text {
+            font-family: var(--ff-display);
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--clr-white)
+        }
+
+        .nav-logo-text span {
+            color: var(--clr-amber)
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            list-style: none
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--clr-gray);
+            font-size: .9rem;
+            font-weight: 500;
+            transition: var(--transition);
+            position: relative
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--clr-amber);
+            transition: var(--transition)
+        }
+
+        .nav-links a:hover {
+            color: var(--clr-white)
+        }
+
+        .nav-links a:hover::after {
+            width: 100%
+        }
+
+        .btn-amber {
+            background: var(--clr-amber);
+            color: #0d0d0d;
+            font-weight: 600;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: var(--ff-body);
+            font-size: .9rem;
+            transition: var(--transition);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px
+        }
+
+        .btn-amber:hover {
+            background: var(--clr-amber-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(245, 166, 35, .3)
+        }
+
+        .btn-green {
+            background: var(--clr-green);
+            color: white;
+            font-weight: 600;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: var(--ff-body);
+            font-size: 1rem;
+            transition: var(--transition);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        .btn-green:hover {
+            background: var(--clr-green-light);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-glow)
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--clr-white);
+            border: 2px solid var(--clr-border);
+            padding: 12px 28px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: var(--ff-body);
+            font-size: 1rem;
+            font-weight: 600;
+            transition: var(--transition);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        .btn-outline:hover {
+            border-color: var(--clr-green-light);
+            color: var(--clr-green-light);
+            transform: translateY(-2px)
+        }
+
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px
+        }
+
+        .hamburger span {
+            display: block;
+            width: 24px;
+            height: 2px;
+            background: var(--clr-white);
+            border-radius: 2px;
+            transition: var(--transition)
+        }
+
+        .hamburger.open span:nth-child(1) {
+            transform: translateY(7px) rotate(45deg)
+        }
+
+        .hamburger.open span:nth-child(2) {
+            opacity: 0
+        }
+
+        .hamburger.open span:nth-child(3) {
+            transform: translateY(-7px) rotate(-45deg)
+        }
+
+        .mobile-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(13, 13, 13, .97);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--clr-border);
+            padding: 24px
+        }
+
+        .mobile-menu.open {
+            display: block
+        }
+
+        .mobile-menu ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 20px
+        }
+
+        .mobile-menu ul a {
+            text-decoration: none;
+            color: var(--clr-gray);
+            font-size: 1.1rem;
+            font-weight: 500;
+            transition: var(--transition)
+        }
+
+        .mobile-menu ul a:hover {
+            color: var(--clr-amber)
+        }
+
+        .mobile-menu .btn-amber {
+            margin-top: 16px;
+            width: 100%;
+            justify-content: center
+        }
+
+        /* ── HERO ── */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            padding: 120px 24px 80px
+        }
+
+        .hero-noise {
+            position: absolute;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+            opacity: .6;
+            pointer-events: none;
+            z-index: 0
+        }
+
+        .hero-glow {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, var(--clr-green-glow) 0%, transparent 70%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 0
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(26, 107, 74, .15);
+            border: 1px solid rgba(26, 107, 74, .4);
+            padding: 6px 16px;
+            border-radius: 100px;
+            font-family: var(--ff-mono);
+            font-size: .75rem;
+            color: var(--clr-green-light);
+            letter-spacing: 1px;
+            margin-bottom: 28px
+        }
+
+        .hero-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: var(--clr-green-light);
+            border-radius: 50%;
+            animation: pulse 2s infinite
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1)
+            }
+
+            50% {
+                opacity: .5;
+                transform: scale(1.4)
+            }
+        }
+
+        .hero-title {
+            font-family: var(--ff-display);
+            font-size: clamp(2.8rem, 7vw, 5.5rem);
+            font-weight: 900;
+            line-height: 1.08;
+            letter-spacing: -.02em;
+            margin-bottom: 24px
+        }
+
+        .hero-title .line2 {
+            color: var(--clr-amber);
+            position: relative;
+            display: inline-block
+        }
+
+        .hero-title .line2::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--clr-amber), transparent);
+            border-radius: 2px
+        }
+
+        .hero-sub {
+            color: var(--clr-gray);
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            max-width: 540px;
+            margin: 0 auto 40px;
+            line-height: 1.7
+        }
+
+        .hero-ctas {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 72px
+        }
+
+        /* Floaty doc cards */
+        .float-cards {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden
+        }
+
+        .fcard {
+            position: absolute;
+            background: var(--clr-surface2);
+            border: 1px solid var(--clr-border);
+            border-radius: 12px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, .4);
+            animation: floatCard 6s ease-in-out infinite
+        }
+
+        .fcard:nth-child(1) {
+            top: 22%;
+            left: 4%;
+            animation-delay: 0s;
+            animation-duration: 7s
+        }
+
+        .fcard:nth-child(2) {
+            top: 15%;
+            right: 5%;
+            animation-delay: -2s;
+            animation-duration: 8s
+        }
+
+        .fcard:nth-child(3) {
+            bottom: 28%;
+            left: 3%;
+            animation-delay: -1s;
+            animation-duration: 6.5s
+        }
+
+        .fcard:nth-child(4) {
+            bottom: 22%;
+            right: 4%;
+            animation-delay: -3s;
+            animation-duration: 9s
+        }
+
+        .fcard:nth-child(5) {
+            top: 55%;
+            left: 1%;
+            animation-delay: -4s;
+            animation-duration: 7.5s
+        }
+
+        @keyframes floatCard {
+
+            0%,
+            100% {
+                transform: translateY(0) rotate(-1deg)
+            }
+
+            50% {
+                transform: translateY(-18px) rotate(1deg)
+            }
+        }
+
+        .fcard-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-family: var(--ff-mono);
+            font-weight: 600;
+            flex-shrink: 0
+        }
+
+        .fcard-icon.pdf {
+            background: rgba(255, 107, 107, .15);
+            color: var(--clr-coral)
+        }
+
+        .fcard-icon.doc {
+            background: rgba(26, 107, 74, .2);
+            color: var(--clr-green-light)
+        }
+
+        .fcard-icon.img {
+            background: rgba(245, 166, 35, .15);
+            color: var(--clr-amber)
+        }
+
+        .fcard-label {
+            font-size: .78rem;
+            color: var(--clr-gray);
+            line-height: 1.3
+        }
+
+        .fcard-label strong {
+            display: block;
+            color: var(--clr-white);
+            font-size: .82rem
+        }
+
+        /* Stats */
+        .hero-stats {
+            display: flex;
+            gap: 48px;
+            justify-content: center;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 2
+        }
+
+        .stat {
+            text-align: center
+        }
+
+        .stat-num {
+            font-family: var(--ff-display);
+            font-size: clamp(1.8rem, 4vw, 2.6rem);
+            font-weight: 700;
+            color: var(--clr-amber);
+            line-height: 1
+        }
+
+        .stat-label {
+            font-size: .82rem;
+            color: var(--clr-gray);
+            margin-top: 4px;
+            letter-spacing: .5px
+        }
+
+        .stat-divider {
+            width: 1px;
+            background: var(--clr-border);
+            align-self: stretch
+        }
+
+        /* ── SECTIONS SHARED ── */
+        section {
+            padding: 100px 0
+        }
+
+        .sec-header {
+            margin-bottom: 64px
+        }
+
+        .sec-header.center {
+            text-align: center
+        }
+
+        .sec-header.center .section-sub {
+            margin: 0 auto
+        }
+
+        /* ── FEATURES ── */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px
+        }
+
+        .feat-card {
+            background: var(--clr-surface);
+            border: 1px solid var(--clr-border);
+            border-radius: var(--radius-lg);
+            padding: 32px 28px;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden
+        }
+
+        .feat-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: var(--radius-lg);
+            border: 1px solid transparent;
+            transition: var(--transition)
+        }
+
+        .feat-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-glow)
+        }
+
+        .feat-card:hover::before {
+            border-color: var(--clr-green-light)
+        }
+
+        .feat-icon {
+            width: 52px;
+            height: 52px;
+            background: rgba(26, 107, 74, .15);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px
+        }
+
+        .feat-icon svg {
+            width: 26px;
+            height: 26px;
+            stroke: var(--clr-green-light);
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round
+        }
+
+        .feat-title {
+            font-family: var(--ff-display);
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 10px
+        }
+
+        .feat-desc {
+            color: var(--clr-gray);
+            font-size: .9rem;
+            line-height: 1.65
+        }
+
+        /* ── HOW IT WORKS ── */
+        .hiw-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 0
+        }
+
+        .hiw-step {
+            display: grid;
+            grid-template-columns: 1fr 80px 1fr;
+            align-items: center;
+            gap: 0;
+            position: relative
+        }
+
+        .hiw-step.reverse .hiw-text {
+            grid-column: 3;
+            grid-row: 1;
+            text-align: left
+        }
+
+        .hiw-step.reverse .hiw-num-wrap {
+            grid-column: 2;
+            grid-row: 1
+        }
+
+        .hiw-step.reverse .hiw-empty {
+            grid-column: 1;
+            grid-row: 1
+        }
+
+        .hiw-text {
+            padding: 40px 48px
+        }
+
+        .hiw-step:not(.reverse) .hiw-text {
+            grid-column: 1;
+            text-align: right
+        }
+
+        .hiw-step:not(.reverse) .hiw-num-wrap {
+            grid-column: 2
+        }
+
+        .hiw-num-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 2
+        }
+
+        .hiw-num {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--clr-green), var(--clr-green-light));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--ff-display);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            box-shadow: 0 0 32px var(--clr-green-glow)
+        }
+
+        .hiw-line {
+            width: 2px;
+            height: 120px;
+            border-left: 2px dashed var(--clr-green);
+            opacity: .4;
+            animation: dashMove 2s linear infinite
+        }
+
+        @keyframes dashMove {
+            from {
+                background-position: 0 0
+            }
+
+            to {
+                background-position: 0 100%
+            }
+        }
+
+        .hiw-last .hiw-line {
+            display: none
+        }
+
+        .hiw-step-title {
+            font-family: var(--ff-display);
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 10px
+        }
+
+        .hiw-step-desc {
+            color: var(--clr-gray);
+            font-size: .95rem;
+            line-height: 1.7
+        }
+
+        .hiw-step-tag {
+            font-family: var(--ff-mono);
+            font-size: .72rem;
+            color: var(--clr-amber);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            display: block
+        }
+
+        /* ── CATEGORIES ── */
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px
+        }
+
+        .cat-card {
+            background: var(--clr-surface);
+            border: 1px solid var(--clr-border);
+            border-radius: var(--radius);
+            padding: 28px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden
+        }
+
+        .cat-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, var(--clr-green-glow), transparent);
+            opacity: 0;
+            transition: var(--transition)
+        }
+
+        .cat-card:hover {
+            transform: translateY(-4px) scale(1.02);
+            border-color: var(--clr-green-light);
+            box-shadow: var(--shadow-glow)
+        }
+
+        .cat-card:hover::after {
+            opacity: 1
+        }
+
+        .cat-emoji {
+            font-size: 2.2rem;
+            margin-bottom: 12px;
+            display: block;
+            position: relative;
+            z-index: 1
+        }
+
+        .cat-name {
+            font-family: var(--ff-display);
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            position: relative;
+            z-index: 1
+        }
+
+        .cat-count {
+            font-family: var(--ff-mono);
+            font-size: .75rem;
+            color: var(--clr-amber);
+            position: relative;
+            z-index: 1
+        }
+
+        /* ── MATERIAL CARDS ── */
+        .materials-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px
+        }
+
+        .mat-card {
+            background: var(--clr-surface);
+            border: 1px solid var(--clr-border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden
+        }
+
+        .mat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--clr-green), var(--clr-amber));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: var(--transition)
+        }
+
+        .mat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, .5)
+        }
+
+        .mat-card:hover::before {
+            transform: scaleX(1)
+        }
+
+        .mat-card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px
+        }
+
+        .mat-badge {
+            font-family: var(--ff-mono);
+            font-size: .68rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 6px;
+            letter-spacing: 1px
+        }
+
+        .mat-badge.pdf {
+            background: rgba(255, 107, 107, .15);
+            color: var(--clr-coral);
+            border: 1px solid rgba(255, 107, 107, .2)
+        }
+
+        .mat-badge.doc {
+            background: rgba(26, 107, 74, .2);
+            color: var(--clr-green-light);
+            border: 1px solid rgba(34, 160, 107, .2)
+        }
+
+        .mat-badge.img {
+            background: rgba(245, 166, 35, .15);
+            color: var(--clr-amber);
+            border: 1px solid rgba(245, 166, 35, .2)
+        }
+
+        .mat-stars {
+            color: var(--clr-amber);
+            font-size: .85rem
+        }
+
+        .mat-title {
+            font-family: var(--ff-display);
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            line-height: 1.3
+        }
+
+        .mat-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 16px
+        }
+
+        .mat-tag {
+            font-size: .75rem;
+            padding: 3px 10px;
+            border-radius: 100px;
+            background: rgba(255, 255, 255, .05);
+            color: var(--clr-gray);
+            border: 1px solid var(--clr-border)
+        }
+
+        .mat-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--clr-gray2);
+            font-size: .78rem;
+            margin-bottom: 20px
+        }
+
+        .mat-dl {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--clr-gray)
+        }
+
+        .mat-dl svg {
+            width: 14px;
+            height: 14px;
+            fill: var(--clr-green-light)
+        }
+
+        .mat-btn {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            background: rgba(26, 107, 74, .15);
+            border: 1px solid rgba(34, 160, 107, .25);
+            color: var(--clr-green-light);
+            font-family: var(--ff-body);
+            font-size: .88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition)
+        }
+
+        .mat-btn:hover {
+            background: var(--clr-green);
+            color: white;
+            border-color: var(--clr-green)
+        }
+
+        /* ── CTA BANNER ── */
+        .cta-banner {
+            background: linear-gradient(135deg, #0d1f17 0%, #0f2819 50%, #0d1f17 100%);
+            border-top: 1px solid var(--clr-green);
+            border-bottom: 1px solid var(--clr-green);
+            padding: 80px 24px;
+            text-align: center;
+            position: relative;
+            overflow: hidden
+        }
+
+        .cta-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent, rgba(26, 107, 74, .08), transparent, rgba(245, 166, 35, .05), transparent);
+            animation: rotateBg 12s linear infinite
+        }
+
+        @keyframes rotateBg {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+
+        .cta-banner-title {
+            font-family: var(--ff-display);
+            font-size: clamp(1.8rem, 4vw, 3rem);
+            font-weight: 900;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 1
+        }
+
+        .cta-banner-sub {
+            color: var(--clr-gray);
+            margin-bottom: 36px;
+            font-size: 1.05rem;
+            position: relative;
+            z-index: 1
+        }
+
+        .cta-banner-btn {
+            position: relative;
+            z-index: 1
+        }
+
+        /* ── TESTIMONIALS ── */
+        .testimonials {
+            background: var(--clr-surface)
+        }
+
+        .testi-carousel {
+            position: relative;
+            overflow: hidden
+        }
+
+        .testi-track {
+            display: flex;
+            transition: transform .5s cubic-bezier(.25, .46, .45, .94)
+        }
+
+        .testi-card {
+            min-width: 100%;
+            padding: 0 8px;
+            box-sizing: border-box
+        }
+
+        .testi-inner {
+            background: var(--clr-surface2);
+            border: 1px solid var(--clr-border);
+            border-radius: var(--radius-lg);
+            padding: 40px;
+            max-width: 700px;
+            margin: 0 auto;
+            position: relative
+        }
+
+        .testi-inner::before {
+            content: '\201C';
+            font-family: var(--ff-display);
+            font-size: 6rem;
+            line-height: .7;
+            color: var(--clr-green);
+            opacity: .3;
+            position: absolute;
+            top: 20px;
+            left: 28px
+        }
+
+        .testi-quote {
+            font-size: 1.05rem;
+            line-height: 1.8;
+            color: var(--clr-gray);
+            margin-bottom: 28px;
+            padding-top: 20px
+        }
+
+        .testi-author {
+            display: flex;
+            align-items: center;
+            gap: 14px
+        }
+
+        .testi-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            flex-shrink: 0
+        }
+
+        .testi-name {
+            font-weight: 600;
+            font-size: .95rem
+        }
+
+        .testi-role {
+            font-size: .8rem;
+            color: var(--clr-gray);
+            font-family: var(--ff-mono)
+        }
+
+        .testi-dots {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 32px
+        }
+
+        .testi-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--clr-border);
+            cursor: pointer;
+            transition: var(--transition)
+        }
+
+        .testi-dot.active {
+            background: var(--clr-amber);
+            width: 24px;
+            border-radius: 4px
+        }
+
+        /* ── FAQ ── */
+        .faq-list {
+            max-width: 720px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px
+        }
+
+        .faq-item {
+            background: var(--clr-surface);
+            border: 1px solid var(--clr-border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: var(--transition)
+        }
+
+        .faq-item.open {
+            border-color: var(--clr-green)
+        }
+
+        .faq-q {
+            width: 100%;
+            padding: 22px 24px;
+            background: none;
+            border: none;
+            color: var(--clr-white);
+            font-family: var(--ff-body);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            text-align: left
+        }
+
+        .faq-q:hover {
+            color: var(--clr-amber)
+        }
+
+        .faq-icon {
+            font-size: 1.4rem;
+            color: var(--clr-amber);
+            flex-shrink: 0;
+            transition: transform var(--transition)
+        }
+
+        .faq-item.open .faq-icon {
+            transform: rotate(45deg)
+        }
+
+        .faq-a {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height .4s ease, padding .3s ease
+        }
+
+        .faq-item.open .faq-a {
+            max-height: 200px
+        }
+
+        .faq-a-inner {
+            padding: 0 24px 22px;
+            color: var(--clr-gray);
+            font-size: .93rem;
+            line-height: 1.75
+        }
+
+        /* ── FOOTER ── */
+        footer {
+            background: #080808;
+            border-top: 1px solid transparent;
+            padding: 72px 0 32px;
+            position: relative
+        }
+
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--clr-green), var(--clr-amber), var(--clr-green), transparent)
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 1.8fr 1fr 1fr 1fr;
+            gap: 48px;
+            margin-bottom: 48px
+        }
+
+        .footer-brand p {
+            color: var(--clr-gray);
+            font-size: .9rem;
+            line-height: 1.7;
+            margin-top: 14px;
+            max-width: 260px
+        }
+
+        .footer-socials {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px
+        }
+
+        .soc-btn {
+            width: 38px;
+            height: 38px;
+            background: var(--clr-surface);
+            border: 1px solid var(--clr-border);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            text-decoration: none
+        }
+
+        .soc-btn:hover {
+            background: var(--clr-green);
+            border-color: var(--clr-green);
+            transform: translateY(-3px)
+        }
+
+        .soc-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: var(--clr-gray);
+            transition: var(--transition)
+        }
+
+        .soc-btn:hover svg {
+            fill: white
+        }
+
+        .footer-col h4 {
+            font-family: var(--ff-display);
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--clr-white)
+        }
+
+        .footer-col ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px
+        }
+
+        .footer-col ul a {
+            text-decoration: none;
+            color: var(--clr-gray);
+            font-size: .88rem;
+            transition: var(--transition)
+        }
+
+        .footer-col ul a:hover {
+            color: var(--clr-amber)
+        }
+
+        .footer-bottom {
+            border-top: 1px solid var(--clr-border);
+            padding-top: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px
+        }
+
+        .footer-bottom p {
+            color: var(--clr-gray2);
+            font-size: .82rem
+        }
+
+        .footer-bottom span {
+            font-family: var(--ff-mono);
+            font-size: .75rem;
+            color: var(--clr-green-light)
+        }
+
+        /* ── RESPONSIVE ── */
+        @media(max-width:1024px) {
+            .features-grid {
+                grid-template-columns: repeat(2, 1fr)
+            }
+
+            .categories-grid {
+                grid-template-columns: repeat(4, 1fr)
+            }
+
+            .materials-grid {
+                grid-template-columns: repeat(2, 1fr)
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 32px
+            }
+
+            .hiw-step {
+                grid-template-columns: 1fr 60px 1fr
+            }
+
+            .hiw-text {
+                padding: 32px 32px
+            }
+        }
+
+        @media(max-width:768px) {
+
+            .nav-links,
+            .nav-cta {
+                display: none
+            }
+
+            .hamburger {
+                display: flex
+            }
+
+            .features-grid,
+            .materials-grid,
+            .categories-grid {
+                grid-template-columns: 1fr 1fr
+            }
+
+            .hiw-step,
+            .hiw-step.reverse {
+                grid-template-columns: 1fr;
+                text-align: left !important
+            }
+
+            .hiw-text,
+            .hiw-step.reverse .hiw-text {
+                grid-column: 1;
+                padding: 20px 0
+            }
+
+            .hiw-num-wrap,
+            .hiw-step.reverse .hiw-num-wrap {
+                grid-column: 1;
+                grid-row: auto;
+                flex-direction: row;
+                gap: 16px;
+                margin-bottom: 8px
+            }
+
+            .hiw-line {
+                width: 60px;
+                height: 2px;
+                border-left: none;
+                border-top: 2px dashed var(--clr-green)
+            }
+
+            .hiw-step.reverse .hiw-empty,
+            .hiw-empty {
+                display: none
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+                gap: 28px
+            }
+
+            section {
+                padding: 72px 0
+            }
+        }
+
+        @media(max-width:480px) {
+
+            .features-grid,
+            .materials-grid,
+            .categories-grid {
+                grid-template-columns: 1fr
+            }
+
+            .hero-stats {
+                gap: 28px
+            }
+
+            .stat-divider {
+                display: none
+            }
+
+            .fcard:nth-child(3),
+            .fcard:nth-child(4),
+            .fcard:nth-child(5) {
+                display: none
+            }
+
+            .testi-inner {
+                padding: 28px 22px
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- LOADER -->
+    <div id="loader" role="status" aria-label="Loading NoteNest">
+        <div class="loader-ring"></div>
+        <span class="loader-logo">Note<span style="color:var(--clr-amber)">Nest</span></span>
+    </div>
+
+    <!-- BACK TO TOP -->
+    <button id="backTop" aria-label="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+        <svg viewBox="0 0 24 24">
+            <path d="M12 19V5M5 12l7-7 7 7" />
+        </svg>
+    </button>
+
+    <!-- NAV -->
+    <header>
+        <nav id="navbar">
+            <div class="container nav-inner">
+                <a href="#" class="nav-logo" aria-label="NoteNest home">
+                    <div class="nav-logo-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path
+                                d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8zM14 2v6h6M16 13H8M16 17H8M10 9H8" />
+                        </svg>
+                    </div>
+                    <span class="nav-logo-text">Note<span>Nest</span></span>
+                </a>
+                <ul class="nav-links">
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#features">Browse</a></li>
+                    <li><a href="#upload-cta">Upload</a></li>
+                    <li><a href="#categories">Categories</a></li>
+                    <li><a href="#about">About</a></li>
+                </ul>
+                <a href="#upload-cta" class="btn-amber nav-cta">Get Started ↗</a>
+                <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+            <div class="mobile-menu" id="mobileMenu">
+                <ul>
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#features">Browse</a></li>
+                    <li><a href="#upload-cta">Upload</a></li>
+                    <li><a href="#categories">Categories</a></li>
+                    <li><a href="#about">About</a></li>
+                </ul>
+                <a href="#upload-cta" class="btn-amber">Get Started ↗</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- HERO -->
+    <main>
+        <section class="hero" id="home">
+            <div class="hero-noise" aria-hidden="true"></div>
+            <div class="hero-glow" aria-hidden="true"></div>
+            <div class="float-cards" aria-hidden="true">
+                <div class="fcard">
+                    <div class="fcard-icon pdf">PDF</div>
+                    <div class="fcard-label"><strong>Physics Notes</strong>Chapter 4 – Optics</div>
+                </div>
+                <div class="fcard">
+                    <div class="fcard-icon doc">DOC</div>
+                    <div class="fcard-label"><strong>Calculus Model Paper</strong>2024 Final Exam</div>
+                </div>
+                <div class="fcard">
+                    <div class="fcard-icon img">IMG</div>
+                    <div class="fcard-label"><strong>Lab Diagram</strong>Chemistry Practical</div>
+                </div>
+                <div class="fcard">
+                    <div class="fcard-icon pdf">PDF</div>
+                    <div class="fcard-label"><strong>CS Question Bank</strong>Data Structures</div>
+                </div>
+                <div class="fcard">
+                    <div class="fcard-icon doc">DOC</div>
+                    <div class="fcard-label"><strong>History Notes</strong>Modern India</div>
+                </div>
+            </div>
+            <div class="hero-content">
+                <div class="hero-badge">✦ Free Academic Resource Hub</div>
+                <h1 class="hero-title">Share Knowledge.<br><span class="line2">Download Success.</span></h1>
+                <p class="hero-sub">The go-to platform where students upload notes, model papers, question banks and
+                    study materials — free for everyone, forever.</p>
+                <div class="hero-ctas">
+                    <a href="#upload-cta" class="btn-green">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" />
+                        </svg>
+                        Start Uploading
+                    </a>
+                    <a href="#materials" class="btn-outline">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="11" cy="11" r="8" />
+                            <path d="m21 21-4.35-4.35" />
+                        </svg>
+                        Browse Materials
+                    </a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <div class="stat-num" data-target="12400" data-suffix="+">0</div>
+                        <div class="stat-label">Notes Shared</div>
+                    </div>
+                    <div class="stat-divider" aria-hidden="true"></div>
+                    <div class="stat">
+                        <div class="stat-num" data-target="8200" data-suffix="+">0</div>
+                        <div class="stat-label">Downloads</div>
+                    </div>
+                    <div class="stat-divider" aria-hidden="true"></div>
+                    <div class="stat">
+                        <div class="stat-num" data-target="3500" data-suffix="+">0</div>
+                        <div class="stat-label">Students</div>
+                    </div>
+                    <div class="stat-divider" aria-hidden="true"></div>
+                    <div class="stat">
+                        <div class="stat-num" data-target="150" data-suffix="+">0</div>
+                        <div class="stat-label">Subjects</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FEATURES -->
+        <section id="features">
+            <div class="container">
+                <div class="sec-header center fade-in">
+                    <span class="section-tag">Why Choose NoteNest</span>
+                    <h2 class="section-title">Everything You Need to Ace Your Exams</h2>
+                    <p class="section-sub">Powerful tools built for students, by students — no clutter, no paywalls.</p>
+                </div>
+                <div class="features-grid">
+                    <div class="feat-card fade-in">
+                        <div class="feat-icon"><svg viewBox="0 0 24 24">
+                                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" />
+                            </svg></div>
+                        <div class="feat-title">Upload Notes</div>
+                        <p class="feat-desc">Share PDFs, DOC files, and images. Drag-and-drop interface lets you upload
+                            in seconds.</p>
+                    </div>
+                    <div class="feat-card fade-in">
+                        <div class="feat-icon"><svg viewBox="0 0 24 24">
+                                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
+                            </svg></div>
+                        <div class="feat-title">Download Instantly</div>
+                        <p class="feat-desc">No signup required to download. Access thousands of study materials
+                            immediately.</p>
+                    </div>
+                    <div class="feat-card fade-in">
+                        <div class="feat-icon"><svg viewBox="0 0 24 24">
+                                <circle cx="11" cy="11" r="8" />
+                                <path d="m21 21-4.35-4.35" />
+                            </svg></div>
+                        <div class="feat-title">Search by Subject</div>
+                        <p class="feat-desc">Powerful full-text search by subject, topic, or keyword. Find exactly what
+                            you need fast.</p>
+                    </div>
+                    <div class="feat-card fade-in">
+                        <div class="feat-icon"><svg viewBox="0 0 24 24">
+                                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+                            </svg></div>
+                        <div class="feat-title">Filter by Year &amp; Type</div>
+                        <p class="feat-desc">Smart filters for exam year, paper type, and subject stream to narrow your
+                            search.</p>
+                    </div>
+                    <div class="feat-card fade-in">
+                        <div class="feat-icon"><svg viewBox="0 0 24 24">
+                                <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                                <path d="M8 21h8M12 17v4" />
+                            </svg></div>
+                        <div class="feat-title">Preview Before Download</div>
+                        <p class="feat-desc">Quick-view mode lets you skim documents before downloading to ensure
+                            quality.</p>
+                    </div>
+                    <div class="feat-card fade-in">
+                        <div class="feat-icon"><svg viewBox="0 0 24 24">
+                                <polygon
+                                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                            </svg></div>
+                        <div class="feat-title">Ratings &amp; Reviews</div>
+                        <p class="feat-desc">Community-driven quality scores help you pick the best materials every
+                            time.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- HOW IT WORKS -->
+        <section id="how-it-works" style="background:var(--clr-surface)">
+            <div class="container">
+                <div class="sec-header center fade-in">
+                    <span class="section-tag">Simple Process</span>
+                    <h2 class="section-title">How It Works</h2>
+                    <p class="section-sub">Three effortless steps to share or discover study materials.</p>
+                </div>
+                <div class="hiw-steps">
+                    <div class="hiw-step fade-in">
+                        <div class="hiw-text">
+                            <span class="hiw-step-tag">Step 01</span>
+                            <div class="hiw-step-title">Upload Your Material</div>
+                            <p class="hiw-step-desc">Drag and drop your notes, question papers, or assignments. Supports
+                                PDF, DOC, DOCX, PNG, JPG and more. Files are scanned and stored securely.</p>
+                        </div>
+                        <div class="hiw-num-wrap">
+                            <div class="hiw-num">1</div>
+                            <div class="hiw-line"></div>
+                        </div>
+                        <div class="hiw-empty"></div>
+                    </div>
+                    <div class="hiw-step reverse fade-in">
+                        <div class="hiw-empty"></div>
+                        <div class="hiw-num-wrap">
+                            <div class="hiw-num">2</div>
+                            <div class="hiw-line"></div>
+                        </div>
+                        <div class="hiw-text">
+                            <span class="hiw-step-tag">Step 02</span>
+                            <div class="hiw-step-title">Tag &amp; Categorise</div>
+                            <p class="hiw-step-desc">Add subject name, year, exam type and relevant topics. Smart
+                                tagging ensures your material reaches the right students searching for it.</p>
+                        </div>
+                    </div>
+                    <div class="hiw-step hiw-last fade-in">
+                        <div class="hiw-text">
+                            <span class="hiw-step-tag">Step 03</span>
+                            <div class="hiw-step-title">Community Benefits</div>
+                            <p class="hiw-step-desc">Your material goes live instantly. Thousands of students find,
+                                rate, and download it — while you earn contributor badges and recognition.</p>
+                        </div>
+                        <div class="hiw-num-wrap">
+                            <div class="hiw-num">3</div>
+                            <div class="hiw-line"></div>
+                        </div>
+                        <div class="hiw-empty"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CATEGORIES -->
+        <section id="categories">
+            <div class="container">
+                <div class="sec-header center fade-in">
+                    <span class="section-tag">Browse</span>
+                    <h2 class="section-title">Explore by Category</h2>
+                    <p class="section-sub">From handwritten notes to full textbooks — every type of material in one
+                        place.</p>
+                </div>
+                <div class="categories-grid fade-in">
+                    <div class="cat-card"><span class="cat-emoji">📝</span>
+                        <div class="cat-name">Notes</div>
+                        <div class="cat-count">2,340 files</div>
+                    </div>
+                    <div class="cat-card"><span class="cat-emoji">📄</span>
+                        <div class="cat-name">Model Papers</div>
+                        <div class="cat-count">876 files</div>
+                    </div>
+                    <div class="cat-card"><span class="cat-emoji">❓</span>
+                        <div class="cat-name">Question Papers</div>
+                        <div class="cat-count">1,204 files</div>
+                    </div>
+                    <div class="cat-card"><span class="cat-emoji">📋</span>
+                        <div class="cat-name">Assignments</div>
+                        <div class="cat-count">534 files</div>
+                    </div>
+                    <div class="cat-card"><span class="cat-emoji">🧪</span>
+                        <div class="cat-name">Lab Reports</div>
+                        <div class="cat-count">389 files</div>
+                    </div>
+                    <div class="cat-card"><span class="cat-emoji">📚</span>
+                        <div class="cat-name">Textbooks</div>
+                        <div class="cat-count">218 files</div>
+                    </div>
+                    <div class="cat-card"><span class="cat-emoji">🗒️</span>
+                        <div class="cat-name">Cheat Sheets</div>
+                        <div class="cat-count">672 files</div>
+                    </div>
+                    <div class="cat-card"><span class="cat-emoji">💡</span>
+                        <div class="cat-name">Exam Tips</div>
+                        <div class="cat-count">310 files</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MATERIALS -->
+        <section id="materials" style="background:var(--clr-surface)">
+            <div class="container">
+                <div class="sec-header center fade-in">
+                    <span class="section-tag">Fresh Uploads</span>
+                    <h2 class="section-title">Recently Shared Materials</h2>
+                    <p class="section-sub">Latest contributions from our student community — updated daily.</p>
+                </div>
+                <div class="materials-grid">
+                    <article class="mat-card fade-in">
+                        <div class="mat-card-top"><span class="mat-badge pdf">PDF</span><span
+                                class="mat-stars">★★★★★</span></div>
+                        <div class="mat-title">Complete Organic Chemistry Notes – Unit 1 to 4</div>
+                        <div class="mat-tags"><span class="mat-tag">Chemistry</span><span
+                                class="mat-tag">2024</span><span class="mat-tag">BSc</span></div>
+                        <div class="mat-meta"><span>Mar 8, 2025</span><span class="mat-dl"><svg viewBox="0 0 24 24">
+                                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
+                                </svg>1.2k downloads</span></div>
+                        <button class="mat-btn">↓ Download Free</button>
+                    </article>
+                    <article class="mat-card fade-in">
+                        <div class="mat-card-top"><span class="mat-badge doc">DOC</span><span
+                                class="mat-stars">★★★★☆</span></div>
+                        <div class="mat-title">Data Structures &amp; Algorithms – Model Paper 2024</div>
+                        <div class="mat-tags"><span class="mat-tag">CS</span><span class="mat-tag">2024</span><span
+                                class="mat-tag">BTech</span></div>
+                        <div class="mat-meta"><span>Mar 5, 2025</span><span class="mat-dl"><svg viewBox="0 0 24 24">
+                                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
+                                </svg>987 downloads</span></div>
+                        <button class="mat-btn">↓ Download Free</button>
+                    </article>
+                    <article class="mat-card fade-in">
+                        <div class="mat-card-top"><span class="mat-badge pdf">PDF</span><span
+                                class="mat-stars">★★★★★</span></div>
+                        <div class="mat-title">Calculus Integration – Cheat Sheet &amp; Formula List</div>
+                        <div class="mat-tags"><span class="mat-tag">Maths</span><span class="mat-tag">2023</span><span
+                                class="mat-tag">Engineering</span></div>
+                        <div class="mat-meta"><span>Feb 28, 2025</span><span class="mat-dl"><svg viewBox="0 0 24 24">
+                                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
+                                </svg>2.3k downloads</span></div>
+                        <button class="mat-btn">↓ Download Free</button>
+                    </article>
+                    <article class="mat-card fade-in">
+                        <div class="mat-card-top"><span class="mat-badge img">IMG</span><span
+                                class="mat-stars">★★★☆☆</span></div>
+                        <div class="mat-title">Human Anatomy – Labeled Diagrams Set (37 Pages)</div>
+                        <div class="mat-tags"><span class="mat-tag">Biology</span><span class="mat-tag">MBBS</span><span
+                                class="mat-tag">Year 1</span></div>
+                        <div class="mat-meta"><span>Feb 22, 2025</span><span class="mat-dl"><svg viewBox="0 0 24 24">
+                                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
+                                </svg>654 downloads</span></div>
+                        <button class="mat-btn">↓ Download Free</button>
+                    </article>
+                    <article class="mat-card fade-in">
+                        <div class="mat-card-top"><span class="mat-badge pdf">PDF</span><span
+                                class="mat-stars">★★★★☆</span></div>
+                        <div class="mat-title">Indian Constitution – Previous Year Question Bank</div>
+                        <div class="mat-tags"><span class="mat-tag">Law</span><span class="mat-tag">2023–24</span><span
+                                class="mat-tag">LLB</span></div>
+                        <div class="mat-meta"><span>Feb 18, 2025</span><span class="mat-dl"><svg viewBox="0 0 24 24">
+                                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
+                                </svg>801 downloads</span></div>
+                        <button class="mat-btn">↓ Download Free</button>
+                    </article>
+                    <article class="mat-card fade-in">
+                        <div class="mat-card-top"><span class="mat-badge doc">DOC</span><span
+                                class="mat-stars">★★★★★</span></div>
+                        <div class="mat-title">Microeconomics – Full Semester Notes with Graphs</div>
+                        <div class="mat-tags"><span class="mat-tag">Economics</span><span
+                                class="mat-tag">BCom</span><span class="mat-tag">2024</span></div>
+                        <div class="mat-meta"><span>Feb 14, 2025</span><span class="mat-dl"><svg viewBox="0 0 24 24">
+                                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
+                                </svg>1.5k downloads</span></div>
+                        <button class="mat-btn">↓ Download Free</button>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- UPLOAD CTA -->
+        <section id="upload-cta">
+            <div class="cta-banner">
+                <span class="section-tag" style="position:relative;z-index:1">Contribute &amp; Grow</span>
+                <h2 class="cta-banner-title">Have Notes to Share?<br>Help <span
+                        style="color:var(--clr-amber)">10,000+</span> Students!</h2>
+                <p class="cta-banner-sub">Join thousands of contributors. Upload your study materials and make a real
+                    difference.</p>
+                <div class="cta-banner-btn">
+                    <a href="#" class="btn-amber" style="font-size:1.05rem;padding:14px 32px">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" />
+                        </svg>
+                        Upload Your Notes Now
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- TESTIMONIALS -->
+        <section id="testimonials" class="testimonials">
+            <div class="container">
+                <div class="sec-header center fade-in">
+                    <span class="section-tag">Student Stories</span>
+                    <h2 class="section-title">What Students Say</h2>
+                </div>
+                <div class="testi-carousel fade-in" role="region" aria-label="Testimonials">
+                    <div class="testi-track" id="testiTrack">
+                        <div class="testi-card">
+                            <div class="testi-inner">
+                                <p class="testi-quote">"NoteNest completely changed how I prepare for exams. I found
+                                    model papers I couldn't find anywhere else — and downloaded them without even
+                                    logging in. It's genuinely the best study resource I've ever used."</p>
+                                <div class="testi-author">
+                                    <div class="testi-avatar"
+                                        style="background:rgba(26,107,74,.2);color:var(--clr-green-light)">AP</div>
+                                    <div>
+                                        <div class="testi-name">Ananya Patel</div>
+                                        <div class="testi-role">B.Sc. Physics · Delhi University</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="testi-card">
+                            <div class="testi-inner">
+                                <p class="testi-quote">"I uploaded my DSA notes and within a week they had 400+
+                                    downloads. Knowing that other students benefit from my work is incredibly
+                                    motivating. NoteNest is building something special here."</p>
+                                <div class="testi-author">
+                                    <div class="testi-avatar"
+                                        style="background:rgba(245,166,35,.15);color:var(--clr-amber)">RK</div>
+                                    <div>
+                                        <div class="testi-name">Rahul Kumar</div>
+                                        <div class="testi-role">B.Tech CSE · IIT Hyderabad</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="testi-card">
+                            <div class="testi-inner">
+                                <p class="testi-quote">"The category filter saved me hours of searching. I found 3 years
+                                    of previous question papers for my Law exam in under 2 minutes. Incredible platform.
+                                    Recommending it to my entire batch."</p>
+                                <div class="testi-author">
+                                    <div class="testi-avatar"
+                                        style="background:rgba(0,180,166,.15);color:var(--clr-teal)">MS</div>
+                                    <div>
+                                        <div class="testi-name">Meera Sharma</div>
+                                        <div class="testi-role">LLB Year 2 · Osmania University</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testi-dots" role="tablist">
+                        <button class="testi-dot active" data-idx="0" aria-label="Testimonial 1" role="tab"></button>
+                        <button class="testi-dot" data-idx="1" aria-label="Testimonial 2" role="tab"></button>
+                        <button class="testi-dot" data-idx="2" aria-label="Testimonial 3" role="tab"></button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ -->
+        <section id="about">
+            <div class="container">
+                <div class="sec-header center fade-in">
+                    <span class="section-tag">FAQs</span>
+                    <h2 class="section-title">Common Questions</h2>
+                    <p class="section-sub">Everything you need to know about NoteNest.</p>
+                </div>
+                <div class="faq-list fade-in">
+                    <div class="faq-item"><button class="faq-q" aria-expanded="false">Is NoteNest completely free?<span
+                                class="faq-icon">+</span></button>
+                        <div class="faq-a">
+                            <div class="faq-a-inner">Yes — 100% free, forever. You can browse, search, and download all
+                                materials without paying anything or even creating an account. Our mission is open
+                                academic access for every student.</div>
+                        </div>
+                    </div>
+                    <div class="faq-item"><button class="faq-q" aria-expanded="false">Do I need to sign up to
+                            download?<span class="faq-icon">+</span></button>
+                        <div class="faq-a">
+                            <div class="faq-a-inner">No account is needed to browse or download. You only need to
+                                register if you want to upload your own materials, track downloads, or earn contributor
+                                badges.</div>
+                        </div>
+                    </div>
+                    <div class="faq-item"><button class="faq-q" aria-expanded="false">What file types can I upload?<span
+                                class="faq-icon">+</span></button>
+                        <div class="faq-a">
+                            <div class="faq-a-inner">We support PDF, DOC, DOCX, PPT, PPTX, PNG, JPG, and JPEG files.
+                                Maximum size per upload is 50MB. ZIP archives of multiple files are also accepted.</div>
+                        </div>
+                    </div>
+                    <div class="faq-item"><button class="faq-q" aria-expanded="false">How is content quality
+                            ensured?<span class="faq-icon">+</span></button>
+                        <div class="faq-a">
+                            <div class="faq-a-inner">Every upload goes through a community review process. Users rate
+                                and review materials, and flagged content is reviewed by moderators. Low-rated materials
+                                are automatically deprioritised.</div>
+                        </div>
+                    </div>
+                    <div class="faq-item"><button class="faq-q" aria-expanded="false">Can I remove my uploaded
+                            material?<span class="faq-icon">+</span></button>
+                        <div class="faq-a">
+                            <div class="faq-a-inner">Absolutely. Log into your account, navigate to your uploads, and
+                                delete any material at any time. Deletion is permanent and immediate.</div>
+                        </div>
+                    </div>
+                    <div class="faq-item"><button class="faq-q" aria-expanded="false">Is my uploaded content
+                            copyrighted?<span class="faq-icon">+</span></button>
+                        <div class="faq-a">
+                            <div class="faq-a-inner">You retain full ownership of your content. By uploading, you grant
+                                NoteNest a non-exclusive license to display it. Please only share original work or
+                                materials you have permission to share.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="#" class="nav-logo" aria-label="NoteNest">
+                        <div class="nav-logo-icon"><svg viewBox="0 0 24 24" fill="white">
+                                <path
+                                    d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8zM14 2v6h6M16 13H8M16 17H8M10 9H8" />
+                            </svg></div>
+                        <span class="nav-logo-text">Note<span>Nest</span></span>
+                    </a>
+                    <p>The free academic platform where students share and discover notes, question papers, model papers
+                        and study resources.</p>
+                    <div class="footer-socials">
+                        <a href="#" class="soc-btn" aria-label="GitHub"><svg viewBox="0 0 24 24">
+                                <path
+                                    d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+                            </svg></a>
+                        <a href="#" class="soc-btn" aria-label="Twitter X"><svg viewBox="0 0 24 24">
+                                <path
+                                    d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                            </svg></a>
+                        <a href="#" class="soc-btn" aria-label="Instagram"><svg viewBox="0 0 24 24">
+                                <path
+                                    d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
+                            </svg></a>
+                        <a href="#" class="soc-btn" aria-label="LinkedIn"><svg viewBox="0 0 24 24">
+                                <path
+                                    d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                            </svg></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#features">Browse Materials</a></li>
+                        <li><a href="#upload-cta">Upload Notes</a></li>
+                        <li><a href="#how-it-works">How It Works</a></li>
+                        <li><a href="#about">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Categories</h4>
+                    <ul>
+                        <li><a href="#categories">Notes</a></li>
+                        <li><a href="#categories">Question Papers</a></li>
+                        <li><a href="#categories">Model Papers</a></li>
+                        <li><a href="#categories">Lab Reports</a></li>
+                        <li><a href="#categories">Cheat Sheets</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Contact</h4>
+                    <ul>
+                        <li><a href="mailto:hello@notenest.io">hello@notenest.io</a></li>
+                        <li><a href="#">Report an Issue</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Contribute</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2025 NoteNest. Made with ♥ for students everywhere.</p>
+                <span>// open-source · free-forever</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        (function () {
+            // ── LOADER ──
+            window.addEventListener('load', () => {
+                setTimeout(() => document.getElementById('loader').classList.add('hidden'), 1200);
+            });
+
+            // ── NAVBAR SCROLL ──
+            const nav = document.getElementById('navbar');
+            const backTop = document.getElementById('backTop');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) nav.classList.add('scrolled'); else nav.classList.remove('scrolled');
+                if (window.scrollY > 300) backTop.classList.add('show'); else backTop.classList.remove('show');
+            }, { passive: true });
+
+            // ── HAMBURGER ──
+            const ham = document.getElementById('hamburger');
+            const mob = document.getElementById('mobileMenu');
+            ham.addEventListener('click', () => {
+                ham.classList.toggle('open');
+                mob.classList.toggle('open');
+                ham.setAttribute('aria-expanded', mob.classList.contains('open'));
+            });
+            mob.querySelectorAll('a').forEach(a => a.addEventListener('click', () => { ham.classList.remove('open'); mob.classList.remove('open'); }));
+
+            // ── COUNTER ──
+            function animateCount(el) {
+                const target = +el.dataset.target;
+                const suffix = el.dataset.suffix || '';
+                const dur = 2000;
+                const step = target / dur * 16;
+                let cur = 0;
+                const tick = () => {
+                    cur = Math.min(cur + step, target);
+                    el.textContent = Math.floor(cur).toLocaleString() + suffix;
+                    if (cur < target) requestAnimationFrame(tick);
+                };
+                tick();
+            }
+            const counters = document.querySelectorAll('.stat-num[data-target]');
+            let counted = false;
+            const heroObs = new IntersectionObserver(entries => {
+                if (entries[0].isIntersecting && !counted) {
+                    counted = true;
+                    counters.forEach(animateCount);
+                }
+            }, { threshold: .5 });
+            const heroStats = document.querySelector('.hero-stats');
+            if (heroStats) heroObs.observe(heroStats);
+
+            // ── FADE-IN ──
+            const fadeEls = document.querySelectorAll('.fade-in');
+            const fadeObs = new IntersectionObserver(entries => {
+                entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+            }, { threshold: .12 });
+            fadeEls.forEach(el => fadeObs.observe(el));
+
+            // ── TESTIMONIALS ──
+            const track = document.getElementById('testiTrack');
+            const dots = document.querySelectorAll('.testi-dot');
+            let cur = 0;
+            function goTo(i) {
+                cur = i;
+                track.style.transform = `translateX(-${i * 100}%)`;
+                dots.forEach((d, j) => d.classList.toggle('active', j === i));
+            }
+            dots.forEach(d => d.addEventListener('click', () => goTo(+d.dataset.idx)));
+            let autoplay = setInterval(() => goTo((cur + 1) % 3), 4000);
+            track.parentElement.addEventListener('mouseenter', () => clearInterval(autoplay));
+            track.parentElement.addEventListener('mouseleave', () => { autoplay = setInterval(() => goTo((cur + 1) % 3), 4000); });
+
+            // ── FAQ ──
+            document.querySelectorAll('.faq-q').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const item = btn.closest('.faq-item');
+                    const open = item.classList.contains('open');
+                    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+                    document.querySelectorAll('.faq-q').forEach(b => b.setAttribute('aria-expanded', 'false'));
+                    if (!open) { item.classList.add('open'); btn.setAttribute('aria-expanded', 'true'); }
+                });
+            });
+
+            // ── SMOOTH SCROLL ──
+            document.querySelectorAll('a[href^="#"]').forEach(a => {
+                a.addEventListener('click', e => {
+                    const target = document.querySelector(a.getAttribute('href'));
+                    if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+                });
+            });
+        })();
+    </script>
+</body>
+
+</html>
