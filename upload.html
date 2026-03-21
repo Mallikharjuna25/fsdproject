@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Material - NoteNest</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .upload-container { max-width: 800px; margin: 0 auto; background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 40px; margin-bottom: 60px; }
+        
+        .drop-zone { border: 2px dashed var(--border); border-radius: 12px; padding: 40px 20px; text-align: center; cursor: pointer; transition: var(--transition); display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 200px; background: rgba(255,255,255,0.02); margin-bottom: 30px; }
+        .drop-zone:hover, .drop-zone.drag-over { border-color: var(--green); background: rgba(26,107,74,0.05); }
+        .upload-icon { font-size: 3rem; margin-bottom: 16px; color: var(--gray); }
+        .drop-zone.drag-over .upload-icon { color: var(--green); transform: translateY(-5px); transition: 0.3s; }
+        
+        .file-preview-card { display: flex; align-items: center; gap: 16px; background: var(--surface); padding: 16px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 30px; }
+        
+        .tag-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .tag-list .tag button { background: none; border: none; color: inherit; margin-left: 6px; cursor: pointer; font-size: 14px; font-weight: bold; }
+        .tag-list .tag button:hover { color: var(--red); }
+        
+        #fileInput { display: none; }
+        #filePreview { display: none; }
+    </style>
+</head>
+<body>
+    <div id="navbar-root"></div>
+
+    <div class="page-wrapper">
+        <div class="container">
+            <h1 class="section-title text-center" style="margin-top:20px; margin-bottom:10px">Share Your Knowledge</h1>
+            <p class="text-center gray" style="margin-bottom:40px">Upload notes, PYQs, and assignments to help the community.</p>
+
+            <div class="upload-container">
+                <form id="uploadForm">
+                    <div class="drop-zone" id="dropZone">
+                        <div class="upload-icon">📄</div>
+                        <h3 style="margin-bottom:8px">Select a file or drag and drop here</h3>
+                        <p class="gray" style="font-size:0.9rem">PDF, DOC, PPT, JPG or PNG. Max 50MB.</p>
+                    </div>
+                    
+                    <div id="filePreview"></div>
+                    <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png">
+
+                    <div class="form-group">
+                        <label>Material Title <span style="color:var(--red)">*</span></label>
+                        <input type="text" id="matTitle" placeholder="e.g. Complete Engineering Mathematics Notes">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="matDesc" rows="4" placeholder="Briefly describe what these notes cover..."></textarea>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>Type <span style="color:var(--red)">*</span></label>
+                            <select id="matType">
+                                <option value="">Select Type</option>
+                                <option value="Notes">Notes</option>
+                                <option value="Model Paper">Model Paper</option>
+                                <option value="Question Paper">Question Paper</option>
+                                <option value="Assignment">Assignment</option>
+                                <option value="Lab Report">Lab Report</option>
+                                <option value="Textbook">Textbook</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Subject <span style="color:var(--red)">*</span></label>
+                            <input type="text" id="matSubject" placeholder="e.g. Mathematics, Physics...">
+                        </div>
+                    </div>
+
+                    <div class="grid-3">
+                        <div class="form-group">
+                            <label>University / College</label>
+                            <input type="text" id="matUni" placeholder="e.g. JNTUK">
+                        </div>
+                        <div class="form-group">
+                            <label>Year</label>
+                            <select id="matYear">
+                                <option value="">Select Year</option>
+                                <option value="1st Year">1st Year</option>
+                                <option value="2nd Year">2nd Year</option>
+                                <option value="3rd Year">3rd Year</option>
+                                <option value="4th Year">4th Year</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Semester</label>
+                            <select id="matSemester">
+                                <option value="">Select Sem</option>
+                                <option value="Sem 1">Sem 1</option>
+                                <option value="Sem 2">Sem 2</option>
+                                <option value="Sem 3">Sem 3</option>
+                                <option value="Sem 4">Sem 4</option>
+                                <option value="Sem 5">Sem 5</option>
+                                <option value="Sem 6">Sem 6</option>
+                                <option value="Sem 7">Sem 7</option>
+                                <option value="Sem 8">Sem 8</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tags</label>
+                        <input type="text" id="tagInput" placeholder="Type a tag and press Enter or comma...">
+                        <div class="tag-list" id="tagList"></div>
+                    </div>
+
+                    <div style="margin-top:40px; text-align:right">
+                        <button type="button" class="btn-ghost" onclick="window.location.href='dashboard.html'" style="margin-right:16px">Cancel</button>
+                        <button type="submit" class="btn-primary" style="padding:14px 32px">Publish Material</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal-overlay" id="successModal">
+        <div class="modal-box text-center">
+            <div style="font-size:4rem; margin-bottom:16px">🎉</div>
+            <h2 style="font-family:'Playfair Display',serif; margin-bottom:12px">Upload Successful!</h2>
+            <p class="gray" style="margin-bottom:32px">Your material is now live and helping other students. You earned community points!</p>
+            <div style="display:flex; flex-direction:column; gap:12px">
+                <a href="#" id="viewUploadBtn" class="btn-primary" style="padding:14px">View Material</a>
+                <button type="button" id="uploadAnotherBtn" class="btn-outline" style="padding:14px">Upload Another</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="auth.js"></script>
+    <script src="toast.js"></script>
+    <script src="nav.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!window.NoteNestAuth.requireAuth()) return;
+
+            // Load Draft
+            const draft = localStorage.getItem('nn_upload_draft');
+            if (draft) {
+                try {
+                    const parsed = JSON.parse(draft);
+                    document.getElementById('matTitle').value = parsed.title || '';
+                    document.getElementById('matDesc').value = parsed.desc || '';
+                    document.getElementById('matType').value = parsed.type || '';
+                    document.getElementById('matSubject').value = parsed.subject || '';
+                    if (parsed.tags) {
+                        window.tags = parsed.tags;
+                        renderTags();
+                    }
+                } catch(e) {}
+            }
+
+            // Drag and Drop Zone
+            const dropZone = document.getElementById('dropZone');
+            const fileInput = document.getElementById('fileInput');
+            let selectedFile = null;
+            
+            dropZone.addEventListener('click', () => fileInput.click());
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('drag-over');
+            });
+            dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('drag-over');
+                handleFiles(e.dataTransfer.files);
+            });
+            fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
+            
+            function handleFiles(files) {
+                const file = files[0];
+                if (!file) return;
+                const allowed = ['application/pdf','application/msword',
+                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                    'application/vnd.ms-powerpoint',
+                    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                    'image/jpeg','image/png'];
+                if (!allowed.includes(file.type)) {
+                    window.Toast.error('File type not supported. Please upload PDF, Word, PPT or Image.');
+                    return;
+                }
+                if (file.size > 52428800) { // 50MB
+                    window.Toast.error('File too large. Max 50MB permitted.');
+                    return;
+                }
+                selectedFile = file;
+                showFilePreview(file);
+            }
+            
+            function showFilePreview(file) {
+                const size = (file.size/1024/1024).toFixed(2) + ' MB';
+                const ext = file.name.split('.').pop().toUpperCase();
+                document.getElementById('filePreview').innerHTML = `
+                    <div class="file-preview-card">
+                        <span class="badge" style="padding:6px 12px; font-size:14px">${ext}</span>
+                        <div style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                            <strong>${file.name}</strong><br>
+                            <span class="gray" style="font-size:0.85rem">${size}</span>
+                        </div>
+                        <button type="button" onclick="clearFile()" class="btn-ghost" style="color:var(--red); font-size:1.2rem; min-width:auto; padding:8px">✕</button>
+                    </div>`;
+                document.getElementById('dropZone').style.display = 'none';
+                document.getElementById('filePreview').style.display = 'block';
+            }
+            
+            window.clearFile = function() {
+                selectedFile = null;
+                fileInput.value = '';
+                document.getElementById('dropZone').style.display = 'flex';
+                document.getElementById('filePreview').style.display = 'none';
+            };
+
+            // Tags
+            if (!window.tags) window.tags = [];
+            const tagInput = document.getElementById('tagInput');
+            
+            tagInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ',') {
+                    e.preventDefault();
+                    const tag = tagInput.value.trim().toLowerCase();
+                    if (tag && !window.tags.includes(tag) && window.tags.length < 10) {
+                        window.tags.push(tag);
+                        renderTags();
+                        tagInput.value = '';
+                    } else if (window.tags.length >= 10) {
+                        window.Toast.warning('Maximum 10 tags allowed');
+                    }
+                }
+            });
+            
+            function renderTags() {
+                document.getElementById('tagList').innerHTML = window.tags.map((t,i) => `
+                    <span class="tag" style="background:rgba(255,255,255,0.05)">${t} 
+                        <button type="button" onclick="removeTag(${i})">×</button>
+                    </span>`).join('');
+            }
+            
+            window.removeTag = function(i) {
+                window.tags.splice(i,1);
+                renderTags();
+            };
+
+            // Form Submit Error Helpers
+            function showError(fieldId, message) {
+                const field = document.getElementById(fieldId);
+                if (!field) return;
+                field.classList.add('input-error');
+                const err = document.createElement('span');
+                err.className = 'form-error';
+                err.textContent = message;
+                field.parentNode.appendChild(err);
+            }
+            function clearErrors() {
+                document.querySelectorAll('.form-error').forEach(e => e.remove());
+                document.querySelectorAll('.input-error').forEach(f => f.classList.remove('input-error'));
+            }
+
+            // Submit logic
+            const uploadForm = document.getElementById('uploadForm');
+            uploadForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                clearErrors();
+                
+                const title = document.getElementById('matTitle').value.trim();
+                const type = document.getElementById('matType').value;
+                const subject = document.getElementById('matSubject').value.trim();
+                
+                let hasError = false;
+                if (!title) { showError('matTitle','Title is required'); hasError = true; }
+                if (!type) { showError('matType','Select a material type'); hasError = true; }
+                if (!subject) { showError('matSubject','Subject is required'); hasError = true; }
+                if (!selectedFile) { window.Toast.warning('Please select a file to upload'); hasError = true; }
+                
+                if (hasError) {
+                    window.scrollTo({top: 200, behavior:'smooth'});
+                    return;
+                }
+                
+                const user = window.NoteNestAuth.getUser();
+                const ext = selectedFile.name.split('.').pop().toUpperCase();
+                const size = (selectedFile.size/1024/1024).toFixed(2) + ' MB';
+                
+                const material = {
+                    id: 'mat_' + Date.now(),
+                    title,
+                    description: document.getElementById('matDesc').value.trim(),
+                    type,
+                    subject,
+                    department: 'Engineering',
+                    course: '',
+                    semester: document.getElementById('matSemester').value || '',
+                    year: document.getElementById('matYear').value || '',
+                    examType: '',
+                    university: document.getElementById('matUni').value.trim() || '',
+                    tags: window.tags,
+                    fileFormat: ext,
+                    fileSize: size,
+                    pages: Math.floor(Math.random() * 50) + 5,
+                    uploadedBy: user.name,
+                    uploaderId: user.id,
+                    uploadDate: new Date().toISOString().split('T')[0],
+                    downloads: 0,
+                    views: 0,
+                    rating: 0,
+                    ratingCount: 0,
+                    comments: []
+                };
+                
+                window.NoteNestData.saveUpload(material);
+                
+                localStorage.removeItem('nn_upload_draft');
+                
+                document.getElementById('successModal').classList.add('active');
+                document.getElementById('viewUploadBtn').href = 'material.html?id=' + material.id;
+                
+                window.Toast.success('Material uploaded successfully!');
+            });
+            
+            // Success Modal Buttons
+            document.getElementById('viewUploadBtn').addEventListener('click', () => {
+                document.getElementById('successModal').classList.remove('active');
+            });
+            
+            document.getElementById('uploadAnotherBtn').addEventListener('click', () => {
+                document.getElementById('successModal').classList.remove('active');
+                uploadForm.reset();
+                window.tags = [];
+                renderTags();
+                clearFile();
+                window.scrollTo({top: 0, behavior:'smooth'});
+            });
+
+            // Auto Draft Save (every 30 seconds)
+            setInterval(() => {
+                if (document.getElementById('successModal').classList.contains('active')) return;
+                
+                const draft = {
+                    title: document.getElementById('matTitle').value,
+                    desc: document.getElementById('matDesc').value,
+                    type: document.getElementById('matType').value,
+                    subject: document.getElementById('matSubject').value,
+                    tags: window.tags
+                };
+                // Only save if dirty
+                if (draft.title || draft.desc || draft.type || draft.subject || (draft.tags && draft.tags.length)) {
+                    localStorage.setItem('nn_upload_draft', JSON.stringify(draft));
+                }
+            }, 30000);
+            
+            setTimeout(() => document.querySelector('.upload-container').classList.add('fade-in', 'visible'), 100);
+        });
+    </script>
+</body>
+</html>

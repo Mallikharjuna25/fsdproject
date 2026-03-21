@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth - NoteNest</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .auth-container { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at center, rgba(26,107,74,0.1), transparent 70%); }
+        .auth-box { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 40px; width: 100%; max-width: 450px; position: relative; z-index: 10; margin-top: 70px; margin-bottom: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        .auth-header { text-align: center; margin-bottom: 30px; }
+        .auth-header h1 { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--white); margin-bottom: 8px; }
+        
+        .auth-tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 30px; }
+        .auth-tab { flex: 1; text-align: center; padding: 12px; cursor: pointer; color: var(--gray); font-weight: 600; transition: var(--transition); border-bottom: 2px solid transparent; }
+        .auth-tab.active { color: var(--amber); border-bottom-color: var(--amber); }
+        .auth-tab:hover:not(.active) { color: var(--white); }
+
+        .auth-form { display: none; }
+        .auth-form.active { display: block; animation: fadeForm 0.3s ease; }
+        @keyframes fadeForm { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .password-wrap { position: relative; }
+        .toggle-pwd { position: absolute; right: 14px; top: 12px; background: none; border: none; color: var(--gray); cursor: pointer; font-size: 0.9rem; font-weight: bold; }
+        
+        .strength-bar { height: 4px; background: #333; border-radius: 2px; margin-top: 8px; overflow: hidden; }
+        .strength-fill { height: 100%; width: 0%; transition: 0.4s ease; }
+        .weak { width: 33%; background: var(--red); }
+        .medium { width: 66%; background: var(--amber); }
+        .strong { width: 100%; background: var(--green-light); }
+        
+        .demo-hint { text-align: center; background: rgba(245,166,35,0.1); padding: 10px; border-radius: 8px; border: 1px solid rgba(245,166,35,0.2); margin-top: 24px; font-size: 0.85rem; color: var(--amber); }
+    </style>
+</head>
+<body>
+    <div id="navbar-root"></div>
+
+    <div class="auth-container">
+        <div class="auth-box fade-in">
+            <div class="auth-header">
+                <h1>Welcome Back</h1>
+                <p class="gray">Join the community to unlock all features.</p>
+            </div>
+            
+            <div class="auth-tabs">
+                <div class="auth-tab active" data-form="loginFormContainer">Login</div>
+                <div class="auth-tab" data-form="signupFormContainer">Sign Up</div>
+            </div>
+
+            <form id="loginFormContainer" class="auth-form active">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="loginEmail" placeholder="you@university.edu" autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <div class="password-wrap">
+                        <input type="password" id="loginPassword" placeholder="••••••••">
+                        <button type="button" class="toggle-pwd">SHOW</button>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-amber" style="width:100%; padding:14px; margin-top:10px">Secure Login</button>
+                
+                <div class="demo-hint">
+                    Demo Account: demo@notenest.com<br>Password: demo123
+                </div>
+            </form>
+
+            <form id="signupFormContainer" class="auth-form">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="signupName" placeholder="John Doe">
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="signupEmail" placeholder="you@university.edu">
+                </div>
+                <div class="grid-2" style="gap:16px">
+                    <div class="form-group">
+                        <label>University (Optional)</label>
+                        <input type="text" id="signupUni" placeholder="e.g. MIT">
+                    </div>
+                    <div class="form-group">
+                        <label>Course (Optional)</label>
+                        <input type="text" id="signupCourse" placeholder="e.g. B.Tech">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Create Password</label>
+                    <div class="password-wrap">
+                        <input type="password" id="signupPassword" placeholder="Min 6 chars">
+                        <button type="button" class="toggle-pwd">SHOW</button>
+                    </div>
+                    <div class="strength-bar"><div class="strength-fill" id="pwdStrength"></div></div>
+                </div>
+                <div class="form-group">
+                    <label>Confirm Password</label>
+                    <div class="password-wrap">
+                        <input type="password" id="signupConfirm" placeholder="Re-type password">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%; padding:14px; margin-top:10px">Create Account</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="auth.js"></script>
+    <script src="toast.js"></script>
+    <script src="nav.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.NoteNestAuth && window.NoteNestAuth.isLoggedIn()) {
+                window.location.href = 'dashboard.html';
+                return;
+            }
+
+            // Tab Switch logic
+            const tabs = document.querySelectorAll('.auth-tab');
+            const forms = document.querySelectorAll('.auth-form');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    forms.forEach(f => f.classList.remove('active'));
+                    tab.classList.add('active');
+                    document.getElementById(tab.dataset.form).classList.add('active');
+                    
+                    const headerTxt = tab.dataset.form === 'loginFormContainer' ? 'Welcome Back' : 'Create an Account';
+                    document.querySelector('.auth-header h1').textContent = headerTxt;
+                });
+            });
+
+            // Password Toggle
+            document.querySelectorAll('.toggle-pwd').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const input = btn.previousElementSibling;
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        btn.textContent = 'HIDE';
+                    } else {
+                        input.type = 'password';
+                        btn.textContent = 'SHOW';
+                    }
+                });
+            });
+
+            // Password strength logic
+            const signupPwd = document.getElementById('signupPassword');
+            const strBar = document.getElementById('pwdStrength');
+            signupPwd.addEventListener('input', () => {
+                const val = signupPwd.value;
+                strBar.className = 'strength-fill';
+                if (val.length === 0) return;
+                if (val.length < 6) strBar.classList.add('weak');
+                else if (val.length < 10) strBar.classList.add('medium');
+                else strBar.classList.add('strong');
+            });
+
+            function clearErrors() {
+                document.querySelectorAll('.form-error').forEach(e => e.remove());
+                document.querySelectorAll('.input-error').forEach(f => f.classList.remove('input-error'));
+            }
+
+            function showError(fieldId, message) {
+                const field = document.getElementById(fieldId);
+                if (!field) return;
+                field.classList.add('input-error');
+                const err = document.createElement('p');
+                err.className = 'form-error';
+                err.textContent = message;
+                field.parentNode.appendChild(err);
+            }
+
+            // Login Logic
+            document.getElementById('loginFormContainer').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const email = document.getElementById('loginEmail').value.trim();
+                const password = document.getElementById('loginPassword').value;
+                
+                clearErrors();
+                if (!email) { showError('loginEmail', 'Email is required'); return; }
+                if (!password) { showError('loginPassword', 'Password is required'); return; }
+                
+                const btn = e.target.querySelector('button[type=submit]');
+                const origTxt = btn.textContent;
+                btn.textContent = 'Logging in...';
+                btn.disabled = true;
+                
+                setTimeout(() => {
+                    const result = window.NoteNestAuth.login(email, password);
+                    if (result.success) {
+                        window.Toast.success('Welcome back, ' + result.user.name + '!');
+                        setTimeout(() => {
+                            const redirect = window.NoteNestAuth.getRedirectUrl();
+                            window.location.href = redirect || 'dashboard.html';
+                        }, 800);
+                    } else {
+                        btn.textContent = origTxt;
+                        btn.disabled = false;
+                        showError('loginEmail', result.error);
+                    }
+                }, 600);
+            });
+
+            // Signup Logic
+            document.getElementById('signupFormContainer').addEventListener('submit', (e) => {
+                e.preventDefault();
+                clearErrors();
+                
+                const name = document.getElementById('signupName').value.trim();
+                const email = document.getElementById('signupEmail').value.trim();
+                const password = document.getElementById('signupPassword').value;
+                const confirm = document.getElementById('signupConfirm').value;
+                const uni = document.getElementById('signupUni').value.trim();
+                const course = document.getElementById('signupCourse').value.trim();
+                
+                if (!name) { showError('signupName', 'Name is required'); return; }
+                if (!email) { showError('signupEmail', 'Email is required'); return; }
+                if (!/\\S+@\\S+\\.\\S+/.test(email)) { showError('signupEmail', 'Enter valid email'); return; }
+                if (password.length < 6) { showError('signupPassword', 'Min 6 characters'); return; }
+                if (password !== confirm) { showError('signupConfirm', 'Passwords do not match'); return; }
+                
+                const btn = e.target.querySelector('button[type=submit]');
+                const origTxt = btn.textContent;
+                btn.textContent = 'Creating account...';
+                btn.disabled = true;
+                
+                setTimeout(() => {
+                    const result = window.NoteNestAuth.signup(name, email, password, uni, course);
+                    if (result.success) {
+                        window.Toast.success('Account created! Welcome, ' + name + '!');
+                        setTimeout(() => {
+                            window.location.href = 'dashboard.html';
+                        }, 800);
+                    } else {
+                        btn.textContent = origTxt;
+                        btn.disabled = false;
+                        window.Toast.error(result.error);
+                    }
+                }, 600);
+            });
+            
+            // Initial fade-in trigger
+            setTimeout(() => document.querySelector('.auth-box').classList.add('visible'), 50);
+        });
+    </script>
+</body>
+</html>
