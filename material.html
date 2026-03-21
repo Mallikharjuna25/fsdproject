@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Material Details - NoteNest</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .mat-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 40px 0; margin-bottom: 40px; }
+        .mat-title { font-family: 'Playfair Display', serif; font-size: 2.2rem; margin-bottom: 16px; color: var(--white); }
+        .mat-meta { display: flex; flex-wrap: wrap; gap: 16px; color: var(--gray); font-size: 0.95rem; margin-bottom: 24px; align-items: center; }
+        .mat-meta span { display: flex; align-items: center; gap: 6px; }
+        
+        .mat-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 40px; }
+        
+        .mat-preview { background: var(--card); border: 1px solid var(--border); border-radius: 12px; height: 500px; display: flex; align-items: center; justify-content: center; flex-direction: column; margin-bottom: 40px; }
+        .mat-desc { line-height: 1.8; color: var(--gray); margin-bottom: 40px; font-size: 1.05rem; }
+        
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; background: var(--surface); padding: 24px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 40px; }
+        .info-item p { margin: 0; }
+        .info-label { font-size: 0.85rem; color: var(--gray); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+        .info-value { font-weight: 500; color: var(--white); }
+        
+        .tags-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 40px; }
+        
+        .sidebar-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px; position: sticky; top: 90px; }
+        .action-btns { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+        
+        .rating-box { text-align: center; padding: 20px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+        .rating-num { font-size: 3rem; font-family: 'Playfair Display', serif; font-weight: 700; color: var(--amber); line-height: 1; }
+        .stars { color: var(--amber); font-size: 1.2rem; margin: 8px 0; }
+        
+        .rate-it { display: flex; justify-content: center; gap: 8px; font-size: 1.5rem; color: var(--gray); cursor: pointer; }
+        .star-input:hover, .star-input:hover ~ .star-input { color: inherit; } /* CSS trick doesn't work well without JS for specific direction, handled in JS */
+        .star-input { transition: 0.2s; }
+        .star-input:hover { transform: scale(1.2); color: var(--amber); }
+        
+        .comments-section { margin-top: 60px; border-top: 1px solid var(--border); padding-top: 40px; }
+        .comment-card { margin-bottom: 16px; padding: 20px; }
+        .comment-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+        
+        .related-card { margin-bottom: 16px; transition: 0.2s; }
+        .related-card:hover { border-color: var(--green-light); transform: translateY(-2px); }
+
+        @media (max-width: 900px) {
+            .mat-layout { grid-template-columns: 1fr; }
+            .sidebar-card { position: static; }
+            .mat-preview { height: 300px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="navbar-root"></div>
+
+    <div class="page-wrapper fade-in">
+        <div class="mat-header">
+            <div class="container">
+                <span class="badge" id="matType" style="margin-bottom:12px; padding:4px 10px; font-size:0.85rem">Type</span>
+                <h1 class="mat-title" id="matTitle">Material Title</h1>
+                <div class="mat-meta">
+                    <span>Uploaded by <strong id="matUploader" style="color:var(--white)">User</strong></span>
+                    <span>·</span>
+                    <span id="matDate">Date</span>
+                    <span>·</span>
+                    <span>👁 <span id="matViews">0</span> views</span>
+                    <span>·</span>
+                    <span>⬇ <span id="matDownloads">0</span> downloads</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="container mat-layout">
+            <main class="mat-main">
+                <div class="mat-preview">
+                    <div style="font-size:4rem; margin-bottom:16px; color:var(--gray)">📄</div>
+                    <h3 style="margin-bottom:8px">Preview Available Shortly</h3>
+                    <p class="gray">Download the file to view its full contents.</p>
+                </div>
+
+                <h3 style="margin-bottom:16px">Description</h3>
+                <div class="mat-desc" id="matDesc">Description goes here...</div>
+
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Subject</div>
+                        <div class="info-value" id="matSubject">Subject Name</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">University</div>
+                        <div class="info-value" id="matUni">University Name</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Year</div>
+                        <div class="info-value" id="matYear">Year</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Semester</div>
+                        <div class="info-value" id="matSemester">Semester</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Format</div>
+                        <div class="info-value" id="matFormat">Format</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Size</div>
+                        <div class="info-value" id="matSize">Size</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Pages</div>
+                        <div class="info-value" id="matPages">Pages</div>
+                    </div>
+                </div>
+
+                <h3 style="margin-bottom:16px">Tags</h3>
+                <div class="tags-container" id="tagsContainer"></div>
+
+                <div class="comments-section">
+                    <h3 style="margin-bottom:24px">Comments & Reviews</h3>
+                    <form id="commentForm" class="card" style="margin-bottom:32px">
+                        <div class="form-group" style="margin-bottom:12px">
+                            <textarea id="commentText" rows="3" placeholder="Write a comment or review..." style="background:var(--surface)"></textarea>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; align-items:center">
+                            <span class="gray" style="font-size:0.9rem">Login to post comments</span>
+                            <button type="submit" class="btn-outline">Post Comment</button>
+                        </div>
+                    </form>
+                    
+                    <div id="commentsContainer"></div>
+                </div>
+            </main>
+
+            <aside class="mat-sidebar">
+                <div class="sidebar-card">
+                    <div class="action-btns">
+                        <button id="downloadBtn" class="btn-primary" style="padding:16px; font-size:1.1rem; width:100%">Download File</button>
+                        <button id="bookmarkBtn" class="btn-outline" style="padding:14px; width:100%">☆ Bookmark</button>
+                        <button id="copyLinkBtn" class="btn-ghost" style="padding:12px; width:100%; border:1px solid var(--border)">🔗 Copy Link</button>
+                    </div>
+
+                    <div class="rating-box">
+                        <div class="rating-num" id="matRating">0.0</div>
+                        <div class="stars" id="starsDisplay">☆☆☆☆☆</div>
+                        <div class="gray" style="font-size:0.85rem">Based on <span id="matRatingCount">0</span> reviews</div>
+                    </div>
+
+                    <div class="text-center" style="margin-bottom:24px">
+                        <p class="gray" style="font-size:0.9rem; margin-bottom:8px">Rate this material</p>
+                        <div class="rate-it">
+                            <span class="star-input" data-value="1">☆</span>
+                            <span class="star-input" data-value="2">☆</span>
+                            <span class="star-input" data-value="3">☆</span>
+                            <span class="star-input" data-value="4">☆</span>
+                            <span class="star-input" data-value="5">☆</span>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 style="margin-bottom:16px; font-size:1.1rem">Related Materials</h3>
+                <div id="relatedGrid"></div>
+            </aside>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="auth.js"></script>
+    <script src="toast.js"></script>
+    <script src="nav.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const id = new URLSearchParams(window.location.search).get('id');
+            if (!id) { window.location.href = 'browse.html'; return; }
+            
+            const mat = window.NoteNestData.getById(id);
+            if (!mat) { window.location.href = 'browse.html'; return; }
+            
+            window.NoteNestData.incrementViews(id);
+            
+            // Populate
+            document.getElementById('matTitle').textContent = mat.title;
+            document.getElementById('matDesc').textContent = mat.description || 'No description provided.';
+            document.getElementById('matType').textContent = mat.type;
+            document.getElementById('matSubject').textContent = mat.subject;
+            document.getElementById('matSemester').textContent = mat.semester || 'N/A';
+            document.getElementById('matYear').textContent = mat.year || 'N/A';
+            document.getElementById('matUploader').textContent = mat.uploadedBy;
+            document.getElementById('matDate').textContent = mat.uploadDate;
+            document.getElementById('matViews').textContent = mat.views + 1; // including current view
+            document.getElementById('matDownloads').textContent = mat.downloads;
+            document.getElementById('matRating').textContent = mat.rating.toFixed(1);
+            document.getElementById('matRatingCount').textContent = mat.ratingCount;
+            document.getElementById('matFormat').textContent = mat.fileFormat;
+            document.getElementById('matSize').textContent = mat.fileSize;
+            document.getElementById('matPages').textContent = mat.pages || 'N/A';
+            document.getElementById('matUni').textContent = mat.university || 'Global';
+            
+            // Stars
+            function renderStars(rating) {
+                const full = Math.floor(rating);
+                const half = rating % 1 >= 0.5 ? 1 : 0;
+                const empty = 5 - full - half;
+                return '★'.repeat(full) + (half?'½':'') + '☆'.repeat(empty);
+            }
+            document.getElementById('starsDisplay').innerHTML = renderStars(mat.rating);
+            
+            // Tags
+            if (mat.tags && mat.tags.length > 0) {
+                document.getElementById('tagsContainer').innerHTML = 
+                    mat.tags.map(t => `<span class="tag" style="background:rgba(255,255,255,0.05)" onclick="window.location.href='browse.html?tag=${encodeURIComponent(t)}'">${t}</span>`).join('');
+            } else {
+                document.getElementById('tagsContainer').innerHTML = '<span class="gray">No tags</span>';
+            }
+            
+            // Comments
+            renderComments(mat.comments || []);
+            
+            // Related
+            const related = window.NoteNestData.getRelated(id, 4);
+            if (related.length > 0) {
+                document.getElementById('relatedGrid').innerHTML = related.map(r => `
+                    <div class="card related-card" onclick="window.location.href='material.html?id=${r.id}'" style="cursor:pointer; padding:16px">
+                        <span class="badge" style="margin-bottom:8px">${r.fileFormat}</span>
+                        <h4 style="font-size:0.95rem; margin-bottom:4px; display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical; overflow:hidden">${r.title}</h4>
+                        <p class="gray" style="font-size:0.85rem">${r.subject}</p>
+                        <span style="font-size:0.8rem; color:var(--gray); margin-top:8px; display:block">⬇ ${r.downloads}</span>
+                    </div>`).join('');
+            } else {
+                document.getElementById('relatedGrid').innerHTML = '<p class="gray">No related materials found.</p>';
+            }
+            
+            // Actions
+            updateBookmarkBtn();
+            
+            document.getElementById('downloadBtn').addEventListener('click', () => {
+                window.NoteNestData.incrementDownloads(id);
+                window.NoteNestData.saveDownload(id);
+                
+                const updatedMat = window.NoteNestData.getById(id);
+                document.getElementById('matDownloads').textContent = updatedMat.downloads;
+                
+                const content = `NoteNest - ${mat.title}\\n${'='.repeat(50)}\\n\\nSubject: ${mat.subject}\\nType: ${mat.type}\\nSemester: ${mat.semester}\\nYear: ${mat.year}\\nUploaded by: ${mat.uploadedBy}\\nDate: ${mat.uploadDate}\\nUniversity: ${mat.university}\\n\\nDescription:\\n${mat.description}\\n\\nTags: ${(mat.tags||[]).join(', ')}\\n\\n${'='.repeat(50)}\\nDownloaded from NoteNest`;
+                const blob = new Blob([content], {type:'text/plain'});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = mat.title.replace(/[^a-z0-9]/gi,'_') + '.txt';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                window.Toast.success('Download started!');
+            });
+            
+            document.getElementById('bookmarkBtn').addEventListener('click', () => {
+                if (!window.NoteNestAuth.isLoggedIn()) {
+                    localStorage.setItem('nn_redirect', window.location.href);
+                    window.location.href = 'auth.html';
+                    return;
+                }
+                const isNow = window.NoteNestData.saveBookmark(window.NoteNestAuth.getUser().id, id);
+                updateBookmarkBtn();
+                window.Toast.info(isNow ? 'Bookmarked!' : 'Removed from bookmarks');
+            });
+            
+            function updateBookmarkBtn() {
+                const btn = document.getElementById('bookmarkBtn');
+                const isMarked = window.NoteNestData.isBookmarked(id);
+                btn.textContent = isMarked ? '★ Bookmarked' : '☆ Bookmark';
+                if (isMarked) {
+                    btn.style.color = 'var(--amber)';
+                    btn.style.borderColor = 'var(--amber)';
+                } else {
+                    btn.style.color = '';
+                    btn.style.borderColor = '';
+                }
+            }
+            
+            document.getElementById('copyLinkBtn').addEventListener('click', () => {
+                navigator.clipboard.writeText(window.location.href)
+                    .then(() => window.Toast.success('Link copied!'))
+                    .catch(() => {
+                        const ta = document.createElement('textarea');
+                        ta.value = window.location.href;
+                        document.body.appendChild(ta);
+                        ta.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(ta);
+                        window.Toast.success('Link copied!');
+                    });
+            });
+            
+            // Rating
+            const starInputs = document.querySelectorAll('.star-input');
+            starInputs.forEach(star => {
+                star.addEventListener('mouseenter', () => {
+                    const val = parseInt(star.dataset.value);
+                    starInputs.forEach(s => {
+                        s.textContent = parseInt(s.dataset.value) <= val ? '★' : '☆';
+                        s.style.color = parseInt(s.dataset.value) <= val ? 'var(--amber)' : '';
+                    });
+                });
+                star.addEventListener('mouseleave', () => {
+                    starInputs.forEach(s => { s.textContent = '☆'; s.style.color = ''; });
+                });
+                star.addEventListener('click', () => {
+                    if (!window.NoteNestAuth.isLoggedIn()) {
+                        window.Toast.info('Please login to rate materials');
+                        return;
+                    }
+                    const val = parseInt(star.dataset.value);
+                    window.NoteNestData.addRating(id, val);
+                    window.Toast.success('Rating submitted!');
+                    
+                    const updated = window.NoteNestData.getById(id);
+                    document.getElementById('matRating').textContent = updated.rating.toFixed(1);
+                    document.getElementById('matRatingCount').textContent = updated.ratingCount;
+                    document.getElementById('starsDisplay').innerHTML = renderStars(updated.rating);
+                });
+            });
+            
+            // Comments
+            document.getElementById('commentForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                if (!window.NoteNestAuth.isLoggedIn()) {
+                    window.Toast.info('Please login to comment');
+                    setTimeout(() => {
+                        localStorage.setItem('nn_redirect', window.location.href);
+                        window.location.href = 'auth.html';
+                    }, 1000);
+                    return;
+                }
+                const user = window.NoteNestAuth.getUser();
+                const text = document.getElementById('commentText').value.trim();
+                if (!text) { window.Toast.warning('Write something first'); return; }
+                
+                window.NoteNestData.addComment(id, {
+                    userId: user.id,
+                    userName: user.name,
+                    text: text
+                });
+                
+                document.getElementById('commentText').value = '';
+                const updated = window.NoteNestData.getById(id);
+                renderComments(updated.comments || []);
+                window.Toast.success('Comment posted!');
+            });
+            
+            function renderComments(comments) {
+                const container = document.getElementById('commentsContainer');
+                if (!comments.length) {
+                    container.innerHTML = '<p class="gray" style="padding:20px 0;text-align:center;background:var(--card);border-radius:12px;border:1px dashed var(--border)">No comments yet. Be the first!</p>';
+                    return;
+                }
+                container.innerHTML = comments.map(c => `
+                    <div class="comment-card card fade-in visible">
+                        <div class="comment-header">
+                            <div class="avatar" style="width:36px;height:36px;font-size:14px">
+                                ${c.userName.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                                <strong style="color:var(--white)">${c.userName}</strong>
+                                <span class="gray" style="font-size:0.85rem; margin-left:8px">${c.date}</span>
+                            </div>
+                        </div>
+                        <p style="margin:12px 0 16px; line-height:1.5; color:var(--white)">${c.text}</p>
+                        <button class="btn-ghost like-btn" data-cid="${c.id}" style="font-size:0.85rem; padding:4px 8px">
+                            ${(c.likedBy && window.NoteNestAuth.getUser() && c.likedBy.includes(window.NoteNestAuth.getUser().id)) ? '<span style="color:var(--red)">♥</span>' : '♡'} ${c.likes}
+                        </button>
+                    </div>`).join('');
+                
+                container.querySelectorAll('.like-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        if (!window.NoteNestAuth.isLoggedIn()) { window.Toast.info('Login to like'); return; }
+                        window.NoteNestData.likeComment(id, btn.dataset.cid);
+                        const refreshed = window.NoteNestData.getById(id);
+                        renderComments(refreshed.comments || []);
+                    });
+                });
+            }
+            
+            setTimeout(() => document.querySelector('.page-wrapper').classList.add('visible'), 50);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse Materials - NoteNest</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .browse-header { background: radial-gradient(circle at center top, rgba(26,107,74,0.1), transparent 80%); padding: 120px 0 40px; border-bottom: 1px solid var(--border); }
+        .search-bar-wrap { position: relative; max-width: 600px; margin: 0 auto 20px; }
+        .search-input { width: 100%; padding: 16px 24px 16px 50px; font-size: 1.1rem; border-radius: 12px; background: var(--card); border: 1px solid var(--border); color: white; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        .search-input:focus { border-color: var(--green); }
+        .search-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: var(--gray); font-size: 1.2rem; }
+        
+        .browse-content { display: flex; gap: 32px; padding: 40px 0; }
+        
+        /* Sidebar layout */
+        .sidebar { width: 280px; flex-shrink: 0; }
+        
+        .filter-group { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 24px; position: sticky; top: 90px; }
+        .filter-block { margin-bottom: 24px; }
+        .filter-block:last-child { margin-bottom: 0; }
+        .filter-title { font-size: 1rem; font-weight: 600; margin-bottom: 12px; color: var(--white); display: flex; justify-content: space-between; align-items: center; }
+        
+        .checkbox-label { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; cursor: pointer; color: var(--gray); transition: 0.2s; font-size: 0.95rem; }
+        .checkbox-label:hover { color: var(--white); }
+        .checkbox-label input { width: auto; margin: 0; }
+        
+        .results-area { flex: 1; }
+        
+        .results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .sort-select { padding: 8px 12px; background: var(--card); border: 1px solid var(--border); border-radius: 6px; color: var(--white); outline: none; }
+        
+        .active-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+        
+        /* Grid */
+        .results-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
+        
+        /* List */
+        .results-list { display: flex; flex-direction: column; gap: 16px; }
+        .results-list .card { display: flex; gap: 20px; align-items: center; }
+        .results-list .card-body { flex: 1; }
+        
+        .card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .card-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; }
+        .card-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+        .card-meta { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--gray); margin-bottom: 12px; }
+        .card-rating { display: flex; align-items: center; gap: 4px; color: var(--amber); font-size: 0.9rem; margin-bottom: 16px; }
+        .card-rating span { color: var(--gray); font-size: 0.8rem; }
+        
+        .download-btn { width: 100%; text-align: center; }
+        .bookmark-btn { font-size: 1.2rem; cursor: pointer; padding: 4px; }
+        .bookmark-btn:hover { color: var(--amber); }
+
+        .empty-state { text-align: center; padding: 60px 20px; background: var(--card); border-radius: 16px; border: 1px dashed var(--border); }
+        .empty-state p { font-size: 1.1rem; color: var(--gray); margin-bottom: 20px; }
+        
+        .pagination { display: flex; justify-content: center; gap: 8px; margin-top: 40px; }
+        .page-btn { padding: 8px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 6px; color: var(--white); cursor: pointer; transition: 0.2s; }
+        .page-btn:hover:not(:disabled) { border-color: var(--green); background: rgba(26,107,74,0.1); }
+        .page-btn.active { background: var(--green); border-color: var(--green); color: white; }
+        .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .fade-in-card { animation: cardFade 0.4s ease forwards; opacity: 0; transform: translateY(10px); }
+        @keyframes cardFade { to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 900px) {
+            .browse-content { flex-direction: column; }
+            .sidebar { width: 100%; }
+            .filter-group { position: static; }
+        }
+    </style>
+</head>
+<body>
+    <div id="navbar-root"></div>
+
+    <div class="browse-header">
+        <div class="container text-center">
+            <h1 style="font-family:'Playfair Display',serif; margin-bottom:16px">Browse Study Materials</h1>
+            <div class="search-bar-wrap">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" class="search-input" placeholder="Search by title, subject, or keywords...">
+            </div>
+            <p class="gray">Find notes, exam papers, and textbooks from students across the globe.</p>
+        </div>
+    </div>
+
+    <div class="container browse-content">
+        <!-- Sidebar Filters -->
+        <aside class="sidebar">
+            <div class="filter-group">
+                <div class="filter-block">
+                    <div class="filter-title">Material Type</div>
+                    <label class="checkbox-label"><input type="checkbox" class="filter-checkbox" data-filter="type" value="Notes"> Notes</label>
+                    <label class="checkbox-label"><input type="checkbox" class="filter-checkbox" data-filter="type" value="Model Paper"> Model Papers</label>
+                    <label class="checkbox-label"><input type="checkbox" class="filter-checkbox" data-filter="type" value="Question Paper"> Question Papers</label>
+                    <label class="checkbox-label"><input type="checkbox" class="filter-checkbox" data-filter="type" value="Assignment"> Assignments</label>
+                    <label class="checkbox-label"><input type="checkbox" class="filter-checkbox" data-filter="type" value="Textbook"> Textbooks</label>
+                </div>
+                <div class="filter-block">
+                    <div class="filter-title">Year</div>
+                    <label class="checkbox-label"><input type="checkbox" class="filter-checkbox" data-filter="year" value="1st Year"> 1st Year</label>
+                    <label class="checkbox-label"><input type="checkbox" class="filter-checkbox" data-filter="year" value="2nd Year"> 2nd Year</label>
+                    <label class="checkbox-label"><input type="checkbox" class="filter-checkbox" data-filter="year" value="3rd Year"> 3rd Year</label>
+                    <label class="checkbox-label"><input type="checkbox" class="filter-checkbox" data-filter="year" value="4th Year"> 4th Year</label>
+                </div>
+                <div class="filter-block">
+                    <div class="filter-title">Semester</div>
+                    <label class="checkbox-label"><input type="checkbox" class="filter-checkbox" data-filter="semester" value="Sem 1"> Semester 1</label>
+                    <label class="checkbox-label"><input type="checkbox" class="filter-checkbox" data-filter="semester" value="Sem 2"> Semester 2</label>
+                    <label class="checkbox-label"><input type="checkbox" class="filter-checkbox" data-filter="semester" value="Sem 3"> Semester 3</label>
+                    <label class="checkbox-label"><input type="checkbox" class="filter-checkbox" data-filter="semester" value="Sem 4"> Semester 4</label>
+                    <label class="checkbox-label"><input type="checkbox" class="filter-checkbox" data-filter="semester" value="Sem 5"> Semester 5</label>
+                    <label class="checkbox-label"><input type="checkbox" class="filter-checkbox" data-filter="semester" value="Sem 6"> Semester 6</label>
+                    <label class="checkbox-label"><input type="checkbox" class="filter-checkbox" data-filter="semester" value="Sem 7"> Semester 7</label>
+                    <label class="checkbox-label"><input type="checkbox" class="filter-checkbox" data-filter="semester" value="Sem 8"> Semester 8</label>
+                </div>
+                <!-- Subject Filter -->
+                <div class="filter-block">
+                    <div class="filter-title">Subject</div>
+                    <label class="checkbox-label"><input type="checkbox" class="filter-checkbox" data-filter="subject" value="Mathematics"> Mathematics</label>
+                    <label class="checkbox-label"><input type="checkbox" class="filter-checkbox" data-filter="subject" value="Physics"> Physics</label>
+                    <label class="checkbox-label"><input type="checkbox" class="filter-checkbox" data-filter="subject" value="Chemistry"> Chemistry</label>
+                    <label class="checkbox-label"><input type="checkbox" class="filter-checkbox" data-filter="subject" value="Data Structures"> Data Structures</label>
+                    <label class="checkbox-label"><input type="checkbox" class="filter-checkbox" data-filter="subject" value="Algorithms"> Algorithms</label>
+                    <label class="checkbox-label"><input type="checkbox" class="filter-checkbox" data-filter="subject" value="Digital Electronics"> Digital Electronics</label>
+                    <label class="checkbox-label"><input type="checkbox" class="filter-checkbox" data-filter="subject" value="Civil Engineering"> Civil Engineering</label>
+                    <label class="checkbox-label"><input type="checkbox" class="filter-checkbox" data-filter="subject" value="Mechanical Engineering"> Mechanical Engineering</label>
+                    <label class="checkbox-label"><input type="checkbox" class="filter-checkbox" data-filter="subject" value="English"> English</label>
+                    <label class="checkbox-label"><input type="checkbox" class="filter-checkbox" data-filter="subject" value="Environmental Science"> Environmental Science</label>
+                    <label class="checkbox-label"><input type="checkbox" class="filter-checkbox" data-filter="subject" value="Economics"> Economics</label>
+                </div>
+                <!-- Exam Filter -->
+                <div class="filter-block">
+                    <div class="filter-title">Exam Type</div>
+                    <label class="checkbox-label"><input type="checkbox" class="filter-checkbox" data-filter="examType" value="Semester End"> Semester End (Finals)</label>
+                    <label class="checkbox-label"><input type="checkbox" class="filter-checkbox" data-filter="examType" value="Mid Term"> Mid Terms</label>
+                    <label class="checkbox-label"><input type="checkbox" class="filter-checkbox" data-filter="examType" value="Practical"> Practicals & Labs</label>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Results Area -->
+        <main class="results-area">
+            <div class="results-header">
+                <div id="resultCount" style="color:var(--gray)">Loading results...</div>
+                <div style="display:flex; gap:16px; align-items:center">
+                    <div style="display:flex; gap:8px">
+                        <button id="gridBtn" class="btn-ghost" style="padding:4px"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h6v6H4V4zm10 0h6v6h-6V4zM4 14h6v6H4v-6zm10 0h6v6h-6v-6z"/></svg></button>
+                        <button id="listBtn" class="btn-ghost" style="padding:4px; opacity:0.5"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M4 6h16v2H4V6zm0 5h16v2H4v-2zm0 5h16v2H4v-2z"/></svg></button>
+                    </div>
+                    <select id="sortSelect" class="sort-select">
+                        <option value="newest">Newest First</option>
+                        <option value="downloads">Most Downloaded</option>
+                        <option value="rating">Top Rated</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="active-filters" id="activeFilters"></div>
+            
+            <div id="resultsGrid" class="results-grid">
+                <!-- Cards injected here -->
+            </div>
+            
+            <div class="pagination" id="pagination">
+                <!-- Pagination injected here -->
+            </div>
+        </main>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="auth.js"></script>
+    <script src="toast.js"></script>
+    <script src="nav.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let allMaterials = window.NoteNestData.getAll();
+            let filtered = [...allMaterials];
+            let currentPage = 1;
+            const perPage = 12;
+            let viewMode = 'grid';
+            let sortBy = 'newest';
+            let activeFilters = {};
+
+            const searchInput = document.getElementById('searchInput');
+            const sortSelect = document.getElementById('sortSelect');
+            const gridBtn = document.getElementById('gridBtn');
+            const listBtn = document.getElementById('listBtn');
+
+            // Parse URL params
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('type')) activeFilters.type = params.get('type');
+            if (params.get('subject')) activeFilters.subject = params.get('subject');
+            if (params.get('tag')) activeFilters.tag = params.get('tag');
+            if (params.get('exam')) activeFilters.examType = params.get('exam');
+            if (params.get('q')) searchInput.value = params.get('q');
+            
+            syncFilterUI();
+            applyFilters();
+
+            // Search input (debounce)
+            let searchTimer;
+            searchInput.addEventListener('input', () => {
+                clearTimeout(searchTimer);
+                searchTimer = setTimeout(() => applyFilters(), 300);
+            });
+
+            // Filter Checkboxes
+            document.querySelectorAll('.filter-checkbox').forEach(cb => {
+                cb.addEventListener('change', () => {
+                    const key = cb.dataset.filter;
+                    const val = cb.value;
+                    if (cb.checked) {
+                        activeFilters[key] = val;
+                        // Uncheck other checkboxes of the same key for simplicity, or keep as multi-select?
+                        // Let's implement single value override for exact spec compliance
+                        document.querySelectorAll(`.filter-checkbox[data-filter="${key}"]`).forEach(other => {
+                            if (other !== cb) other.checked = false;
+                        });
+                    } else {
+                        if (activeFilters[key] === val) delete activeFilters[key];
+                    }
+                    applyFilters();
+                });
+            });
+
+            // Sort
+            sortSelect.addEventListener('change', () => {
+                sortBy = sortSelect.value;
+                applyFilters();
+            });
+
+            // View Toggle
+            gridBtn.addEventListener('click', () => { 
+                viewMode = 'grid'; 
+                gridBtn.style.opacity = '1'; 
+                listBtn.style.opacity = '0.5'; 
+                renderResults(); 
+            });
+            listBtn.addEventListener('click', () => { 
+                viewMode = 'list'; 
+                listBtn.style.opacity = '1'; 
+                gridBtn.style.opacity = '0.5'; 
+                renderResults(); 
+            });
+
+            function applyFilters() {
+                let results = window.NoteNestData.filter({ ...activeFilters });
+                
+                const q = searchInput.value.toLowerCase().trim();
+                if (q) {
+                    results = results.filter(m =>
+                        m.title.toLowerCase().includes(q) ||
+                        m.subject.toLowerCase().includes(q) ||
+                        m.tags.some(t => t.toLowerCase().includes(q))
+                    );
+                }
+                
+                filtered = window.NoteNestData.sort(results, sortBy);
+                currentPage = 1;
+                renderResults();
+                updateActiveChips();
+            }
+
+            function syncFilterUI() {
+                document.querySelectorAll('.filter-checkbox').forEach(cb => {
+                    const key = cb.dataset.filter;
+                    const val = cb.value;
+                    if (activeFilters[key] === val) {
+                        cb.checked = true;
+                    }
+                });
+            }
+
+            function updateActiveChips() {
+                const container = document.getElementById('activeFilters');
+                const chips = [];
+                for (let k in activeFilters) {
+                    chips.push(`<span class="tag" style="background:rgba(255,255,255,0.05)">${k}: ${activeFilters[k]} <button type="button" onclick="removeFilter('${k}')" style="border:none;background:none;color:inherit;cursor:pointer;margin-left:4px">×</button></span>`);
+                }
+                if (searchInput.value.trim()) {
+                    chips.push(`<span class="tag" style="background:rgba(255,255,255,0.05)">search: ${searchInput.value.trim()} <button type="button" onclick="clearSearch()" style="border:none;background:none;color:inherit;cursor:pointer;margin-left:4px">×</button></span>`);
+                }
+                container.innerHTML = chips.join('');
+            }
+            
+            window.removeFilter = function(key) {
+                delete activeFilters[key];
+                syncFilterUI();
+                applyFilters();
+            };
+            
+            window.clearSearch = function() {
+                searchInput.value = '';
+                applyFilters();
+            };
+            
+            window.clearAllFilters = function() {
+                activeFilters = {};
+                searchInput.value = '';
+                document.querySelectorAll('.filter-checkbox').forEach(cb => cb.checked = false);
+                applyFilters();
+            };
+
+            function renderResults() {
+                const start = (currentPage - 1) * perPage;
+                const pageItems = filtered.slice(start, start + perPage);
+                const grid = document.getElementById('resultsGrid');
+                
+                document.getElementById('resultCount').textContent = `Showing ${filtered.length} results`;
+                
+                if (filtered.length === 0) {
+                    grid.className = '';
+                    grid.innerHTML = `
+                        <div class="empty-state">
+                            <p>No materials found matching your criteria</p>
+                            <button class="btn-outline" onclick="clearAllFilters()">Clear Filters</button>
+                        </div>`;
+                    document.getElementById('pagination').innerHTML = '';
+                    return;
+                }
+                
+                grid.className = viewMode === 'grid' ? 'results-grid' : 'results-list';
+                grid.innerHTML = pageItems.map((m, i) => renderCard(m, i)).join('');
+                
+                // Attach events
+                grid.querySelectorAll('.download-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        handleDownload(btn.dataset.id);
+                    });
+                });
+                grid.querySelectorAll('.bookmark-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        handleBookmark(btn.dataset.id, btn);
+                    });
+                });
+                grid.querySelectorAll('.material-card').forEach(card => {
+                    card.addEventListener('click', () => {
+                        window.location.href = 'material.html?id=' + card.dataset.id;
+                    });
+                });
+                
+                renderPagination();
+            }
+
+            function renderCard(m, i) {
+                const isBookmarked = window.NoteNestData.isBookmarked(m.id);
+                const delay = i * 0.05;
+                const fullStars = Math.round(m.rating);
+                const starsHtml = '★'.repeat(fullStars) + '☆'.repeat(5-fullStars);
+                const tagStr = m.semester || m.year || 'General';
+
+                if (viewMode === 'grid') {
+                    return `
+                    <div class="material-card card fade-in-card" data-id="${m.id}" style="cursor:pointer; animation-delay:${delay}s">
+                        <div class="card-top">
+                            <span class="badge" style="background:rgba(255,255,255,0.1)">${m.fileFormat}</span>
+                            <button class="bookmark-btn btn-ghost" data-id="${m.id}" style="${isBookmarked ? 'color:var(--amber)' : ''}">
+                                ${isBookmarked ? '★' : '☆'}
+                            </button>
+                        </div>
+                        <h3 class="card-title">${m.title}</h3>
+                        <div class="card-tags">
+                            <span class="tag" style="background:none;font-size:12px">${m.subject}</span>
+                            <span class="tag" style="background:none;font-size:12px">${tagStr}</span>
+                        </div>
+                        <div class="card-meta">
+                            <span>by ${m.uploadedBy}</span>
+                            <span>⬇ ${m.downloads}</span>
+                        </div>
+                        <div class="card-rating">
+                            ${starsHtml}
+                            <span>(${m.ratingCount})</span>
+                        </div>
+                        <button type="button" class="btn-amber download-btn" data-id="${m.id}" style="width:100%">Download</button>
+                    </div>`;
+                } else {
+                    return `
+                    <div class="material-card card fade-in-card" data-id="${m.id}" style="cursor:pointer; animation-delay:${delay}s; display:flex; justify-content:space-between">
+                        <div class="card-body">
+                            <h3 style="margin-bottom:8px">${m.title}</h3>
+                            <p class="gray" style="font-size:0.9rem; margin-bottom:8px">${m.subject} · ${tagStr} · by ${m.uploadedBy}</p>
+                            <div class="card-rating" style="margin-bottom:0">
+                                ${starsHtml} <span>(${m.ratingCount})</span>
+                            </div>
+                        </div>
+                        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px">
+                            <div style="display:flex; gap:16px; align-items:center">
+                                <span class="badge">${m.fileFormat}</span>
+                                <span class="gray" style="font-size:0.9rem">⬇ ${m.downloads}</span>
+                                <button class="bookmark-btn btn-ghost" data-id="${m.id}" style="${isBookmarked ? 'color:var(--amber)' : ''}">${isBookmarked ? '★' : '☆'}</button>
+                            </div>
+                            <button type="button" class="btn-amber download-btn" data-id="${m.id}">Download</button>
+                        </div>
+                    </div>`;
+                }
+            }
+
+            function renderPagination() {
+                const total = Math.ceil(filtered.length / perPage);
+                const pager = document.getElementById('pagination');
+                if (total <= 1) {
+                    pager.innerHTML = '';
+                    return;
+                }
+                
+                let html = `<button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="goToPage(${currentPage-1})">Prev</button>`;
+                for (let i = 1; i <= total; i++) {
+                    html += `<button class="page-btn ${currentPage === i ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+                }
+                html += `<button class="page-btn" ${currentPage === total ? 'disabled' : ''} onclick="goToPage(${currentPage+1})">Next</button>`;
+                pager.innerHTML = html;
+            }
+            
+            window.goToPage = function(p) {
+                const total = Math.ceil(filtered.length / perPage);
+                if (p >= 1 && p <= total) {
+                    currentPage = p;
+                    renderResults();
+                    window.scrollTo({top: 0, behavior: 'smooth'});
+                }
+            };
+
+            function handleDownload(id) {
+                window.NoteNestData.incrementDownloads(id);
+                window.NoteNestData.saveDownload(id);
+                const mat = window.NoteNestData.getById(id);
+                
+                // Real simulated download file
+                const content = `NoteNest Download\n\nTitle: ${mat.title}\nSubject: ${mat.subject}\nType: ${mat.type}\nUploaded by: ${mat.uploadedBy}\nDate: ${mat.uploadDate}\n\nDescription:\n${mat.description}`;
+                const blob = new Blob([content], {type:'text/plain'});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = mat.title.replace(/[^a-z0-9]/gi, '_') + '.txt';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                window.Toast.success('Download started!');
+                
+                // re-render to update download count
+                let updatedMatIndex = filtered.findIndex(x => x.id === id);
+                if(updatedMatIndex !== -1) {
+                   filtered[updatedMatIndex] = window.NoteNestData.getById(id);
+                   renderResults();
+                }
+            }
+
+            function handleBookmark(id, btn) {
+                if (!window.NoteNestAuth.isLoggedIn()) {
+                    localStorage.setItem('nn_redirect', window.location.href);
+                    window.location.href = 'auth.html';
+                    return;
+                }
+                const isNow = window.NoteNestData.saveBookmark(window.NoteNestAuth.getUser().id, id);
+                btn.textContent = isNow ? '★' : '☆';
+                btn.style.color = isNow ? 'var(--amber)' : '';
+                window.Toast.info(isNow ? 'Bookmarked!' : 'Bookmark removed');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Categories - NoteNest</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .cat-header { background: radial-gradient(circle at center top, rgba(245,166,35,0.1), transparent 70%); padding: 100px 0 40px; border-bottom: 1px solid var(--border); text-align: center; }
+        .cat-search { max-width: 500px; margin: 30px auto 0; position: relative; }
+        .cat-search input { width: 100%; padding: 16px 24px; border-radius: 30px; background: var(--card); border: 1px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        .cat-search input:focus { border-color: var(--amber); }
+
+        .cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; margin-top: 40px; }
+        .cat-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 30px; text-align: center; transition: 0.3s; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 200px; text-decoration: none; color: inherit; }
+        .cat-card:hover { border-color: var(--amber); transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+        .cat-icon { font-size: 3rem; margin-bottom: 20px; }
+        .cat-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; margin-bottom: 10px; color: var(--white); }
+        .cat-count { color: var(--gray); font-size: 0.9rem; background: rgba(255,255,255,0.05); padding: 4px 12px; border-radius: 20px; }
+
+        .subject-grid { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 30px; }
+        .subject-tag { padding: 12px 24px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: 0.2s; font-weight: 500; }
+        .subject-tag:hover { background: var(--amber); color: #000; border-color: var(--amber); }
+        
+        .exam-card { background: var(--surface); border-left: 4px solid var(--red); padding: 20px; border-radius: 8px; cursor: pointer; transition: 0.2s; border-top: 1px solid var(--border); border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+        .exam-card:hover { transform: translateX(5px); background: #1c1c1c; }
+
+        .tag-cloud-container { padding: 40px 0; text-align: center; }
+        .tag-cloud { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; max-width: 800px; margin: 0 auto; }
+        .tag-cloud .tag { background: none; border: none; padding: 5px; transition: 0.2s; line-height: 1.2; }
+        .tag-cloud .tag:hover { color: var(--amber); transform: scale(1.1); }
+    </style>
+</head>
+<body>
+    <div id="navbar-root"></div>
+
+    <div class="page-wrapper" style="padding-top:60px">
+        <div class="cat-header">
+            <div class="container">
+                <h1 style="font-family:'Playfair Display',serif; font-size:2.8rem; margin-bottom:16px">Material Categories</h1>
+                <p class="gray" style="font-size:1.1rem">Browse thousands of resources organized by type and subject.</p>
+                <div class="cat-search">
+                    <input type="text" id="catSearch" placeholder="Filter categories...">
+                </div>
+            </div>
+        </div>
+
+        <section class="section">
+            <div class="container">
+                <h2 class="section-title text-center" style="font-size:1.8rem; margin-bottom:10px">By Document Type</h2>
+                <div class="cat-grid" id="typeGrid">
+                    <div class="cat-card" data-type="Notes">
+                        <div class="cat-icon">📝</div>
+                        <h3 class="cat-title">Lecture Notes</h3>
+                        <div class="cat-count">Loading...</div>
+                    </div>
+                    <div class="cat-card" data-type="Model Paper">
+                        <div class="cat-icon">📄</div>
+                        <h3 class="cat-title">Model Papers</h3>
+                        <div class="cat-count">Loading...</div>
+                    </div>
+                    <div class="cat-card" data-type="Question Paper">
+                        <div class="cat-icon">❓</div>
+                        <h3 class="cat-title">Question Papers</h3>
+                        <div class="cat-count">Loading...</div>
+                    </div>
+                    <div class="cat-card" data-type="Assignment">
+                        <div class="cat-icon">💻</div>
+                        <h3 class="cat-title">Assignments</h3>
+                        <div class="cat-count">Loading...</div>
+                    </div>
+                    <div class="cat-card" data-type="Lab Report">
+                        <div class="cat-icon">🔬</div>
+                        <h3 class="cat-title">Lab Reports</h3>
+                        <div class="cat-count">Loading...</div>
+                    </div>
+                    <div class="cat-card" data-type="Textbook">
+                        <div class="cat-icon">📚</div>
+                        <h3 class="cat-title">Textbooks</h3>
+                        <div class="cat-count">Loading...</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" style="background:var(--surface)">
+            <div class="container">
+                <h2 class="section-title text-center" style="font-size:1.8rem; margin-bottom:10px">Popular Subjects</h2>
+                <div class="subject-grid">
+                    <div class="subject-tag" data-subject="Mathematics">Engineering Mathematics</div>
+                    <div class="subject-tag" data-subject="Physics">Applied Physics</div>
+                    <div class="subject-tag" data-subject="Chemistry">Organic Chemistry</div>
+                    <div class="subject-tag" data-subject="Data Structures">Data Structures</div>
+                    <div class="subject-tag" data-subject="Algorithms">Algorithms</div>
+                    <div class="subject-tag" data-subject="Digital Electronics">Digital Electronics</div>
+                    <div class="subject-tag" data-subject="Civil Engineering">Civil Engineering</div>
+                    <div class="subject-tag" data-subject="Mechanical Engineering">Mechanical Engineering</div>
+                    <div class="subject-tag" data-subject="English">English</div>
+                    <div class="subject-tag" data-subject="Environmental Science">Environmental Science</div>
+                    <div class="subject-tag" data-subject="Economics">Economics</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container">
+                <h2 class="section-title text-center" style="font-size:1.8rem; margin-bottom:30px">By Exam Type</h2>
+                <div class="grid-3" style="max-width:900px; margin:0 auto">
+                    <div class="exam-card" data-exam="Semester End">
+                        <h4 style="margin-bottom:8px">Semester End (Finals)</h4>
+                        <p class="gray" style="font-size:0.85rem">Comprehensive coverage for end semester.</p>
+                    </div>
+                    <div class="exam-card" data-exam="Mid Term" style="border-left-color:var(--amber)">
+                        <h4 style="margin-bottom:8px">Mid Terms</h4>
+                        <p class="gray" style="font-size:0.85rem">Half-syllabus revision.</p>
+                    </div>
+                    <div class="exam-card" data-exam="Practical" style="border-left-color:var(--green-light)">
+                        <h4 style="margin-bottom:8px">Practicals & Labs</h4>
+                        <p class="gray" style="font-size:0.85rem">Viva questions and records.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" style="background:var(--surface)">
+            <div class="container">
+                <h2 class="section-title text-center" style="font-size:1.8rem; margin-bottom:10px">Trending Tags</h2>
+                <div class="tag-cloud-container">
+                    <div class="tag-cloud" id="tagCloud">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <div class="container text-center">
+                <p class="gray">© 2025 NoteNest. Made with ♥ for students everywhere.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="auth.js"></script>
+    <script src="toast.js"></script>
+    <script src="nav.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Populate counts
+            const types = ['Notes','Model Paper','Question Paper','Assignment','Lab Report','Textbook'];
+            types.forEach(type => {
+                const count = window.NoteNestData.filter({type}).length;
+                const el = document.querySelector(`.cat-card[data-type="${type}"] .cat-count`);
+                if (el) el.textContent = count + ' materials';
+            });
+            
+            // Clicks
+            document.querySelectorAll('.cat-card[data-type]').forEach(card => {
+                card.addEventListener('click', () => {
+                    window.location.href = 'browse.html?type=' + encodeURIComponent(card.dataset.type);
+                });
+            });
+            
+            document.querySelectorAll('.subject-tag').forEach(tag => {
+                tag.addEventListener('click', () => {
+                    window.location.href = 'browse.html?subject=' + encodeURIComponent(tag.dataset.subject);
+                });
+            });
+            
+            document.querySelectorAll('.exam-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    window.location.href = 'browse.html?exam=' + encodeURIComponent(card.dataset.exam);
+                });
+            });
+            
+            // Tag Cloud
+            const tags = window.NoteNestData.getAllTags();
+            const tagCloud = document.getElementById('tagCloud');
+            if (tagCloud && tags.length > 0) {
+                tagCloud.innerHTML = tags.map(({tag, count}) => {
+                    // scale size linearly from 12px min to ~26px max
+                    const size = 12 + Math.min(count * 2, 14);
+                    const opacity = 0.5 + Math.min(count * 0.1, 0.5);
+                    return `<span class="tag" style="font-size:${size}px; color:rgba(255,255,255,${opacity}); cursor:pointer" onclick="window.location.href='browse.html?tag=${encodeURIComponent(tag)}'">${tag}</span>`;
+                }).join(' ');
+            } else if(tagCloud) {
+                tagCloud.innerHTML = '<span class="gray">No tags available yet.</span>';
+            }
+            
+            // Search filter
+            const searchInput = document.getElementById('catSearch');
+            if (searchInput) {
+                searchInput.addEventListener('input', () => {
+                    const q = searchInput.value.toLowerCase();
+                    // Filter doc types
+                    document.querySelectorAll('.cat-card').forEach(card => {
+                        const text = card.textContent.toLowerCase();
+                        card.style.display = text.includes(q) ? '' : 'none';
+                    });
+                    // Filter subjects
+                    document.querySelectorAll('.subject-tag').forEach(tag => {
+                        const text = tag.textContent.toLowerCase();
+                        tag.style.display = text.includes(q) ? '' : 'none';
+                    });
+                });
+            }
+
+            // Reveal animations
+            setTimeout(() => {
+                document.querySelectorAll('.fade-in').forEach(el => el.classList.add('visible'));
+            }, 100);
+        });
+    </script>
+</body>
+</html>

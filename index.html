@@ -1565,42 +1565,8 @@
     </button>
 
     <!-- NAV -->
-    <header>
-        <nav id="navbar">
-            <div class="container nav-inner">
-                <a href="#" class="nav-logo" aria-label="NoteNest home">
-                    <div class="nav-logo-icon">
-                        <svg viewBox="0 0 24 24">
-                            <path
-                                d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8zM14 2v6h6M16 13H8M16 17H8M10 9H8" />
-                        </svg>
-                    </div>
-                    <span class="nav-logo-text">Note<span>Nest</span></span>
-                </a>
-                <ul class="nav-links">
-                    <li><a href="#home">Home</a></li>
-                    <li><a href="#features">Browse</a></li>
-                    <li><a href="#upload-cta">Upload</a></li>
-                    <li><a href="#categories">Categories</a></li>
-                    <li><a href="#about">About</a></li>
-                </ul>
-                <a href="#upload-cta" class="btn-amber nav-cta">Get Started ↗</a>
-                <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
-                    <span></span><span></span><span></span>
-                </button>
-            </div>
-            <div class="mobile-menu" id="mobileMenu">
-                <ul>
-                    <li><a href="#home">Home</a></li>
-                    <li><a href="#features">Browse</a></li>
-                    <li><a href="#upload-cta">Upload</a></li>
-                    <li><a href="#categories">Categories</a></li>
-                    <li><a href="#about">About</a></li>
-                </ul>
-                <a href="#upload-cta" class="btn-amber">Get Started ↗</a>
-            </div>
-        </nav>
-    </header>
+    <!-- NAV -->
+    <div id="navbar-root"></div>
 
     <!-- HERO -->
     <main>
@@ -1635,14 +1601,14 @@
                 <p class="hero-sub">The go-to platform where students upload notes, model papers, question banks and
                     study materials — free for everyone, forever.</p>
                 <div class="hero-ctas">
-                    <a href="#upload-cta" class="btn-green">
+                    <a href="upload.html" class="btn-green">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2">
                             <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" />
                         </svg>
                         Start Uploading
                     </a>
-                    <a href="#materials" class="btn-outline">
+                    <a href="browse.html" class="btn-outline">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2">
                             <circle cx="11" cy="11" r="8" />
@@ -1925,7 +1891,7 @@
                 <p class="cta-banner-sub">Join thousands of contributors. Upload your study materials and make a real
                     difference.</p>
                 <div class="cta-banner-btn">
-                    <a href="#" class="btn-amber" style="font-size:1.05rem;padding:14px 32px">
+                    <a href="upload.html" class="btn-amber" style="font-size:1.05rem;padding:14px 32px">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2">
                             <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" />
@@ -2106,11 +2072,11 @@
                 <div class="footer-col">
                     <h4>Categories</h4>
                     <ul>
-                        <li><a href="#categories">Notes</a></li>
-                        <li><a href="#categories">Question Papers</a></li>
-                        <li><a href="#categories">Model Papers</a></li>
-                        <li><a href="#categories">Lab Reports</a></li>
-                        <li><a href="#categories">Cheat Sheets</a></li>
+                        <li><a href="browse.html?type=Notes">Notes</a></li>
+                        <li><a href="browse.html?type=Question+Paper">Question Papers</a></li>
+                        <li><a href="browse.html?type=Model+Paper">Model Papers</a></li>
+                        <li><a href="browse.html?type=Lab+Report">Lab Reports</a></li>
+                        <li><a href="browse.html?type=Cheat+Sheet">Cheat Sheets</a></li>
                     </ul>
                 </div>
                 <div class="footer-col">
@@ -2131,30 +2097,20 @@
         </div>
     </footer>
 
+    <script src="data.js"></script>
+    <script src="auth.js"></script>
+    <script src="toast.js"></script>
+    <script src="nav.js"></script>
     <script>
         (function () {
             // ── LOADER ──
             window.addEventListener('load', () => {
                 setTimeout(() => document.getElementById('loader').classList.add('hidden'), 1200);
             });
-
-            // ── NAVBAR SCROLL ──
-            const nav = document.getElementById('navbar');
             const backTop = document.getElementById('backTop');
             window.addEventListener('scroll', () => {
-                if (window.scrollY > 50) nav.classList.add('scrolled'); else nav.classList.remove('scrolled');
                 if (window.scrollY > 300) backTop.classList.add('show'); else backTop.classList.remove('show');
             }, { passive: true });
-
-            // ── HAMBURGER ──
-            const ham = document.getElementById('hamburger');
-            const mob = document.getElementById('mobileMenu');
-            ham.addEventListener('click', () => {
-                ham.classList.toggle('open');
-                mob.classList.toggle('open');
-                ham.setAttribute('aria-expanded', mob.classList.contains('open'));
-            });
-            mob.querySelectorAll('a').forEach(a => a.addEventListener('click', () => { ham.classList.remove('open'); mob.classList.remove('open'); }));
 
             // ── COUNTER ──
             function animateCount(el) {
@@ -2194,7 +2150,7 @@
             let cur = 0;
             function goTo(i) {
                 cur = i;
-                track.style.transform = `translateX(-${i * 100}%)`;
+                track.style.transform = `translateX(-${i * 100 / dots.length}%)`;
                 dots.forEach((d, j) => d.classList.toggle('active', j === i));
             }
             dots.forEach(d => d.addEventListener('click', () => goTo(+d.dataset.idx)));
